@@ -16,4 +16,5 @@ x = 4
 y = 4
 
 [terminal]
-shell = { program = "/bin/bash", args = ["-c", "tmux attach-session"] }
+# Attach to an existing tmux session, or create one when none exists.
+shell = { program = "/bin/bash", args = ["-c", "tmux has-session 2>/dev/null && exec tmux attach-session || exec tmux new-session"] }

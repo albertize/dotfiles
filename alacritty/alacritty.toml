@@ -14,3 +14,6 @@ lines = 28
 [window.padding]
 x = 4
 y = 4
+
+[terminal]
+shell = { program = "/bin/bash", args = ["-c", "tmux attach-session"] }

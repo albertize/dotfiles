@@ -102,6 +102,19 @@ function M.setup()
     WildMenu = { fg = c.base, bg = c.blue },
     QuickFixLine = { fg = c.lavender, bg = c.surface0, bold = true },
 
+    -- Native home page.
+    NativeHomeHeader = { fg = c.mauve, bold = true },
+    NativeHomeTitle = { fg = c.blue, bold = true },
+    NativeHomeKey = { fg = c.peach, bold = true },
+    NativeHomeAction = { fg = c.text },
+    NativeHomeMuted = { fg = c.overlay0, italic = true },
+
+    -- Command summary.
+    NativeHelpTitle = { fg = c.mauve, bold = true },
+    NativeHelpKey = { fg = c.peach, bold = true },
+    NativeHelpText = { fg = c.text },
+    NativeHelpMuted = { fg = c.overlay0, italic = true },
+
     -- Diff and spelling.
     DiffAdd = { fg = c.green, bg = c.surface0 },
     DiffChange = { fg = c.yellow, bg = c.surface0 },

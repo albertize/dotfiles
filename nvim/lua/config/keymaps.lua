@@ -1,12 +1,14 @@
 -- Global navigation, search, build and diagnostic keymaps.
 local project = require("config.project")
 local diagnostics = require("config.diagnostics")
+local command_help = require("config.help")
 local group = vim.api.nvim_create_augroup("NativeIDEKeymaps", { clear = true })
 
 local function map(modes, lhs, rhs, desc)
   vim.keymap.set(modes, lhs, rhs, { silent = true, desc = desc })
 end
 
+map("n", "<leader>?", command_help.open, "Command summary")
 map("n", "<leader>p", project.files, "Find file")
 map("n", "<leader>ff", project.files, "Find file")
 map("n", "<leader>fb", "<cmd>Buffers<cr>", "Find buffer")

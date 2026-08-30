@@ -7,7 +7,8 @@ local root_markers = {
 }
 
 function M.root()
-  return vim.fs.root(0, root_markers) or vim.fn.getcwd()
+  local source = vim.b.native_ide_home and vim.fn.getcwd() or 0
+  return vim.fs.root(source, root_markers) or vim.fn.getcwd()
 end
 
 local function native_picker(items, title, on_choice)

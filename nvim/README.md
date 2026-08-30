@@ -6,6 +6,7 @@ It requires Neovim 0.12 or later and has been tested with the installed Neovim 0
 ## Included features
 
 - Native Catppuccin Macchiato theme matching the terminal
+- Native home page with project actions for `nvim` and `nvim .`
 - Automatic LSP startup for servers available in `PATH`
 - Native LSP completion and snippet expansion
 - Diagnostics, code actions, rename, hover and signature help
@@ -29,6 +30,8 @@ The configuration is split by responsibility:
 - `lua/config/autocmds.lua` — general autocommands
 - `lua/config/statusline.lua` — statusline and Git branch
 - `lua/config/tabline.lua` — clickable buffer line
+- `lua/config/home.lua` — native startup home page
+- `lua/config/help.lua` — floating command summary
 - `lua/config/project.lua` — project root, pickers and grep
 - `lua/config/diagnostics.lua` — diagnostic presentation and navigation
 - `lua/config/lsp.lua` — language servers and LSP behavior
@@ -47,12 +50,17 @@ LSP servers are external processes, not Neovim plugins. The configuration only e
 :checkhealth vim.lsp
 ```
 
+## Home page
+
+Starting with either `nvim` or `nvim .` opens the native home page instead of a picker. Directory arguments become the working directory, while explicit file arguments still open the requested file. Use `f` for files, `r` for recent files, `g` for project grep, `b` for buffers, `n` for a new file and `q` to quit. The arrow keys or `j`/`k` select an action and `Enter` executes it. Use `:Home` to open it again.
+
 ## Main keymaps
 
 The leader key is `Space`.
 
 | Key | Action |
 |---|---|
+| `<leader>?` | command summary |
 | `<leader>p` / `<leader>ff` | file picker |
 | `<leader>fb` | buffer picker |
 | `<leader>fr` | recent files |
@@ -81,6 +89,7 @@ In a picker, type to filter, use `Ctrl-n`/`Ctrl-p` to move, `Enter` to open and 
 
 ## Commands
 
+- `:Home`, `:Commands`
 - `:Files`, `:Buffers`, `:Oldfiles`, `:Grep [text]`
 - `:ProjectRoot`
 - `:FormatOnSave` — toggle for the current buffer

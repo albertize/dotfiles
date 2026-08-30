@@ -8,9 +8,9 @@ repo_dir=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P) || exit 
 config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
 
 links=(
-  ".vimrc|$HOME/.vimrc"
   ".tmux.conf|$HOME/.tmux.conf"
   "alacritty|$config_home/alacritty"
+  "nvim|$config_home/nvim"
 )
 
 link_file() {

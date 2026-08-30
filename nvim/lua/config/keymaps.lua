@@ -1,0 +1,49 @@
+-- Global navigation, search, build and diagnostic keymaps.
+local project = require("config.project")
+local diagnostics = require("config.diagnostics")
+local group = vim.api.nvim_create_augroup("NativeIDEKeymaps", { clear = true })
+
+local function map(modes, lhs, rhs, desc)
+  vim.keymap.set(modes, lhs, rhs, { silent = true, desc = desc })
+end
+
+map("n", "<leader>p", project.files, "Find file")
+map("n", "<leader>ff", project.files, "Find file")
+map("n", "<leader>fb", "<cmd>Buffers<cr>", "Find buffer")
+map("n", "<leader>fr", "<cmd>Oldfiles<cr>", "Recent files")
+map("n", "<leader>fg", function() project.grep() end, "Grep project")
+map("n", "<leader>fw", function() project.grep(vim.fn.expand("<cword>")) end, "Grep word under cursor")
+map("n", "<leader>e", vim.diagnostic.open_float, "Line diagnostics")
+map("n", "[d", function() diagnostics.jump(-1) end, "Previous diagnostic")
+map("n", "]d", function() diagnostics.jump(1) end, "Next diagnostic")
+map("n", "<leader>dq", vim.diagnostic.setqflist, "Diagnostics in quickfix")
+map("n", "<leader>dt", function()
+  vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+end, "Toggle diagnostics")
+map("i", "<C-Space>", vim.lsp.completion.get, "Complete with LSP")
+map("n", "<leader>w", "<cmd>write<cr>", "Save")
+map("n", "<leader>q", "<cmd>quit<cr>", "Quit")
+map("n", "<leader>bd", "<cmd>bdelete<cr>", "Delete buffer")
+map("n", "[b", "<cmd>bprevious<cr>", "Previous buffer")
+map("n", "]b", "<cmd>bnext<cr>", "Next buffer")
+map("n", "[q", "<cmd>cprevious<cr>", "Previous quickfix item")
+map("n", "]q", "<cmd>cnext<cr>", "Next quickfix item")
+map("n", "<leader>co", "<cmd>copen<cr>", "Open quickfix")
+map("n", "<leader>cc", "<cmd>cclose<cr>", "Close quickfix")
+map("n", "<leader>mm", function()
+  vim.cmd("silent make!")
+  vim.cmd("cwindow")
+end, "Build with makeprg")
+map("n", "<Esc>", "<cmd>nohlsearch<cr>", "Clear search highlights")
+map("n", "<C-h>", "<C-w>h", "Focus left window")
+map("n", "<C-j>", "<C-w>j", "Focus window below")
+map("n", "<C-k>", "<C-w>k", "Focus window above")
+map("n", "<C-l>", "<C-w>l", "Focus right window")
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = group,
+  pattern = { "qf", "help", "man", "checkhealth" },
+  callback = function(ev)
+    vim.keymap.set("n", "q", "<cmd>close<cr>", { buf = ev.buf, silent = true })
+  end,
+})

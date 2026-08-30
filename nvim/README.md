@@ -14,7 +14,7 @@ It requires Neovim 0.12 or later and has been tested with the installed Neovim 0
 - Semantic tokens, inlay hints, code lens and document highlights
 - Format on save
 - Native clickable buffer line that keeps the active buffer visible
-- Native fuzzy picker for files, buffers and recent files
+- Native fuzzy picker with highlighted matches for files, buffers and recent files
 - Project search and quickfix integration with `ripgrep`
 - Builds through `makeprg`
 - Statusline with Git branch, diagnostics and active LSP clients

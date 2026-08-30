@@ -1,5 +1,6 @@
 -- Project-root detection, native fuzzy pickers and project-wide search.
 local M = {}
+local picker_match_namespace = vim.api.nvim_create_namespace("NativePickerMatch")
 
 local root_markers = {
   ".git", ".hg", "Makefile", "CMakeLists.txt", "package.json", "pyproject.toml",
@@ -42,6 +43,7 @@ local function native_picker(items, title, on_choice)
   vim.fn.prompt_setprompt(input_buf, " Search > ")
 
   local filtered = {}
+  local filtered_positions = {}
   local selected = 1
   local picker_group = vim.api.nvim_create_augroup("NativePicker" .. input_buf, { clear = true })
   local closed = false
@@ -62,13 +64,33 @@ local function native_picker(items, title, on_choice)
       local prompt = vim.fn.prompt_getprompt(input_buf)
       query = vim.startswith(line, prompt) and line:sub(#prompt + 1) or line
     end
-    filtered = query == "" and vim.list_slice(items, 1, math.min(#items, 500))
-      or vim.list_slice(vim.fn.matchfuzzy(items, query), 1, 500)
+    if query == "" then
+      filtered = vim.list_slice(items, 1, math.min(#items, 500))
+      filtered_positions = {}
+    else
+      local fuzzy = vim.fn.matchfuzzypos(items, query)
+      filtered = vim.list_slice(fuzzy[1], 1, 500)
+      filtered_positions = vim.list_slice(fuzzy[2], 1, 500)
+    end
     selected = math.max(1, math.min(selected, math.max(1, #filtered)))
 
     local display = #filtered > 0 and filtered or { "  No results" }
     vim.bo[list_buf].modifiable = true
     vim.api.nvim_buf_set_lines(list_buf, 0, -1, false, display)
+    vim.api.nvim_buf_clear_namespace(list_buf, picker_match_namespace, 0, -1)
+    for row, positions in ipairs(filtered_positions) do
+      local text = filtered[row]
+      for _, char_position in ipairs(positions) do
+        local start_col = vim.fn.byteidx(text, char_position)
+        local end_col = vim.fn.byteidx(text, char_position + 1)
+        if start_col >= 0 then
+          vim.api.nvim_buf_set_extmark(list_buf, picker_match_namespace, row - 1, start_col, {
+            end_col = end_col >= 0 and end_col or #text,
+            hl_group = "NativePickerMatch",
+          })
+        end
+      end
+    end
     vim.bo[list_buf].modifiable = false
     if vim.api.nvim_win_is_valid(list_win) then
       vim.api.nvim_win_set_cursor(list_win, { selected, 0 })

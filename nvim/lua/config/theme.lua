@@ -115,6 +115,9 @@ function M.setup()
     NativeHelpText = { fg = c.text },
     NativeHelpMuted = { fg = c.overlay0, italic = true },
 
+    -- Native fuzzy picker.
+    NativePickerMatch = { fg = c.peach, bold = true, underline = true },
+
     -- Diff and spelling.
     DiffAdd = { fg = c.green, bg = c.surface0 },
     DiffChange = { fg = c.yellow, bg = c.surface0 },

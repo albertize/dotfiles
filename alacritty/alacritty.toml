@@ -4,7 +4,7 @@ general.import = ["~/.config/alacritty/themes/catppuccin-macchiato.toml"]
 size = 11.0
 
 [font.normal]
-family = "Noto Sans Mono"
+family = "JetBrainsMono Nerd Font"
 style = "Regular"
 
 [window.dimensions]

@@ -115,8 +115,9 @@ function M.setup()
     NativeHelpText = { fg = c.text },
     NativeHelpMuted = { fg = c.overlay0, italic = true },
 
-    -- Native fuzzy picker.
+    -- Native search matches.
     NativePickerMatch = { fg = c.peach, bold = true, underline = true },
+    NativeGrepMatch = { fg = c.peach, bold = true, underline = true },
 
     -- Diff and spelling.
     DiffAdd = { fg = c.green, bg = c.surface0 },

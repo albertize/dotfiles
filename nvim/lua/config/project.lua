@@ -1,6 +1,7 @@
 -- Project-root detection, native fuzzy pickers and project-wide search.
 local M = {}
 local picker_match_namespace = vim.api.nvim_create_namespace("NativePickerMatch")
+local grep_match_namespace = vim.api.nvim_create_namespace("NativeGrepMatch")
 
 local root_markers = {
   ".git", ".hg", "Makefile", "CMakeLists.txt", "package.json", "pyproject.toml",
@@ -192,6 +193,50 @@ function M.files()
   end)
 end
 
+local function highlight_grep_matches(entries, matches)
+  local buf = vim.api.nvim_get_current_buf()
+  if vim.bo[buf].buftype ~= "quickfix" then return end
+
+  vim.api.nvim_buf_clear_namespace(buf, grep_match_namespace, 0, -1)
+  local rendered_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+  for row, entry in ipairs(entries) do
+    local rendered = rendered_lines[row]
+    if rendered then
+      -- Quickfix strips leading whitespace from item text, so derive the
+      -- message column from its rendered location prefix and compensate.
+      local _, prefix_bytes = rendered:find("^.-|%d+.-| ")
+      if prefix_bytes then
+        local first_content = entry.text:find("%S") or (#entry.text + 1)
+        local stripped_bytes = first_content - 1
+        local fallback_from = prefix_bytes + 1
+        for _, position in ipairs(matches[row] or {}) do
+          local start_col = prefix_bytes + math.max(0, position.start - stripped_bytes)
+          local end_col = prefix_bytes + math.max(0, position.finish - stripped_bytes)
+          local rendered_match = rendered:sub(start_col + 1, end_col)
+
+          -- Fall back to the exact text reported by ripgrep if quickfix has
+          -- normalized whitespace or control characters in the message.
+          if position.text ~= "" and rendered_match ~= position.text then
+            local fallback_start, fallback_end = rendered:find(position.text, fallback_from, true)
+            if fallback_start then
+              start_col = fallback_start - 1
+              end_col = fallback_end
+            end
+          end
+
+          if end_col > start_col and end_col <= #rendered then
+            vim.api.nvim_buf_set_extmark(buf, grep_match_namespace, row - 1, start_col, {
+              end_col = end_col,
+              hl_group = "NativeGrepMatch",
+            })
+            fallback_from = end_col + 1
+          end
+        end
+      end
+    end
+  end
+end
+
 function M.grep(default)
   if vim.fn.executable("rg") == 0 then
     vim.notify("Live grep requires the 'rg' (ripgrep) executable", vim.log.levels.ERROR)
@@ -203,20 +248,42 @@ function M.grep(default)
 
     local root = M.root()
     local result = vim.system({
-      "rg", "--vimgrep", "--smart-case", "--hidden", "-g", "!.git", "-g", "!node_modules", query, ".",
+      "rg", "--json", "--smart-case", "--hidden", "-g", "!.git", "-g", "!node_modules", query, ".",
     }, { cwd = root, text = true }):wait()
-    local lines = vim.split(result.stdout or "", "\n", { trimempty = true })
-    if #lines == 0 then
+
+    local entries = {}
+    local matches = {}
+    for _, json_line in ipairs(vim.split(result.stdout or "", "\n", { trimempty = true })) do
+      local ok, object = pcall(vim.json.decode, json_line)
+      if ok and object.type == "match" and object.data.path.text and object.data.lines.text then
+        local data = object.data
+        local text = data.lines.text:gsub("[\r\n]+$", "")
+        local positions = {}
+        for _, submatch in ipairs(data.submatches or {}) do
+          positions[#positions + 1] = {
+            start = submatch.start,
+            finish = submatch["end"],
+            text = submatch.match.text,
+          }
+        end
+        entries[#entries + 1] = {
+          filename = vim.fs.joinpath(root, (data.path.text:gsub("^%./", ""))),
+          lnum = data.line_number,
+          col = positions[1] and (positions[1].start + 1) or 1,
+          text = text,
+        }
+        matches[#matches + 1] = positions
+      end
+    end
+
+    if #entries == 0 then
       vim.notify("No results for: " .. query)
       return
     end
 
-    vim.fn.setqflist({}, " ", {
-      title = "Grep: " .. query,
-      lines = lines,
-      efm = "%f:%l:%c:%m",
-    })
+    vim.fn.setqflist({}, " ", { title = "Grep: " .. query, items = entries })
     vim.cmd("copen")
+    highlight_grep_matches(entries, matches)
   end)
 end
 

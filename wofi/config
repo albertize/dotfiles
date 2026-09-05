@@ -1,0 +1,13 @@
+show=drun
+prompt=Cerca applicazioni…
+width=45%
+height=55%
+location=center
+allow_images=true
+image_size=18
+insensitive=true
+term=alacritty
+gtk_dark=true
+matching=fuzzy
+sort_order=default
+no_actions=true

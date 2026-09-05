@@ -1,0 +1,103 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 22,
+  "spacing": 0,
+  "margin-top": 0,
+  "margin-bottom": 0,
+  "margin-left": 0,
+  "margin-right": 0,
+
+  "modules-left": ["sway/workspaces", "sway/mode"],
+  "modules-center": ["clock"],
+  "modules-right": ["idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "battery", "tray", "custom/clipboard", "custom/power"],
+
+  "sway/workspaces": {
+    "disable-scroll": true,
+    "all-outputs": true,
+    "format": "{name}"
+  },
+  "sway/mode": {
+    "format": "<span style=\"italic\">{}</span>"
+  },
+  "clock": {
+    "interval": 1,
+    "format": "󰥔  {:%H:%M}",
+    "format-alt": "󰃭  {:%A %d %B %Y}",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>"
+  },
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "󰅶",
+      "deactivated": "󰾪"
+    },
+    "tooltip-format-activated": "Sospensione automatica disattivata",
+    "tooltip-format-deactivated": "Sospensione automatica attiva"
+  },
+  "pulseaudio": {
+    "scroll-step": 5,
+    "format": "{icon}  {volume}%",
+    "format-muted": "󰖁  muto",
+    "format-icons": {
+      "headphone": "󰋋",
+      "hands-free": "󰋎",
+      "headset": "󰋎",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": ["", "", ""]
+    },
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-click-right": "pavucontrol"
+  },
+  "network": {
+    "format-wifi": "  {signalStrength}%",
+    "format-ethernet": "󰈀  connessa",
+    "format-linked": "󰈀  nessun IP",
+    "format-disconnected": "󰤭  offline",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ipaddr}\nClick: gestisci le reti",
+    "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}\nClick: gestisci le reti",
+    "tooltip-format-disconnected": "Rete disconnessa\nClick: scegli una rete",
+    "on-click": "~/.config/waybar/scripts/network-menu.sh"
+  },
+  "cpu": {
+    "interval": 5,
+    "format": "  {usage}%",
+    "tooltip": false
+  },
+  "memory": {
+    "interval": 5,
+    "format": "  {percentage}%",
+    "tooltip-format": "{used:0.1f} GiB usati"
+  },
+  "battery": {
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon}  {capacity}%",
+    "format-charging": "󰂄  {capacity}%",
+    "format-plugged": "󰚥  {capacity}%",
+    "format-alt": "{time}  {icon}",
+    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+  },
+  "tray": {
+    "icon-size": 18,
+    "spacing": 5
+  },
+  "custom/clipboard": {
+    "format": "󰅍",
+    "tooltip": true,
+    "tooltip-format": "Click: clipboard history\nRight click: delete an entry\nMiddle click: clear history",
+    "on-click": "~/.config/waybar/scripts/clipboard-menu.sh",
+    "on-click-right": "~/.config/waybar/scripts/clipboard-menu.sh delete",
+    "on-click-middle": "~/.config/waybar/scripts/clipboard-menu.sh wipe"
+  },
+  "custom/power": {
+    "format": "",
+    "tooltip": true,
+    "tooltip-format": "Blocca, esci o spegni",
+    "on-click": "~/.config/waybar/scripts/power-menu.sh"
+  }
+}

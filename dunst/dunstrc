@@ -1,0 +1,92 @@
+[global]
+    monitor = 0
+    follow = mouse
+
+    width = (240, 340)
+    height = (0, 160)
+    origin = top-right
+    offset = (4, 24)
+    scale = 0
+    notification_limit = 5
+
+    progress_bar = true
+    progress_bar_height = 6
+    progress_bar_frame_width = 1
+    progress_bar_min_width = 120
+    progress_bar_max_width = 300
+    progress_bar_corner_radius = 0
+
+    indicate_hidden = true
+    transparency = 0
+    separator_height = 1
+    padding = 6
+    horizontal_padding = 8
+    text_icon_padding = 8
+    frame_width = 1
+    frame_color = "#8aadf4"
+    gap_size = 0
+    separator_color = frame
+    sort = true
+
+    font = JetBrainsMono Nerd Font 10
+    line_height = 2
+    markup = full
+    format = "<b>%s</b>\n%b"
+    alignment = left
+    vertical_alignment = center
+    show_age_threshold = 60
+    ellipsize = end
+    ignore_newline = false
+    stack_duplicates = true
+    hide_duplicate_count = false
+    show_indicators = true
+
+    enable_recursive_icon_lookup = true
+    icon_theme = Adwaita
+    icon_position = left
+    min_icon_size = 16
+    max_icon_size = 32
+
+    sticky_history = true
+    history_length = 50
+    dmenu = wofi --dmenu --prompt "Notification action"
+    browser = xdg-open
+    always_run_script = true
+
+    corner_radius = 0
+    layer = overlay
+    force_xwayland = false
+
+    mouse_left_click = do_action, close_current
+    mouse_middle_click = open_url
+    mouse_right_click = close_current
+
+[experimental]
+    per_monitor_dpi = true
+    pause_on_mouse_over = true
+
+[desktop_controls]
+    appname = Desktop controls
+    history_ignore = true
+    timeout = 2
+
+[urgency_low]
+    background = "#1e2030"
+    foreground = "#a5adcb"
+    frame_color = "#494d64"
+    timeout = 4
+    default_icon = dialog-information
+
+[urgency_normal]
+    background = "#24273a"
+    foreground = "#cad3f5"
+    frame_color = "#8aadf4"
+    timeout = 6
+    default_icon = dialog-information
+
+[urgency_critical]
+    background = "#24273a"
+    foreground = "#cad3f5"
+    frame_color = "#ed8796"
+    timeout = 0
+    default_icon = dialog-warning

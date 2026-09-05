@@ -6,11 +6,26 @@ set -u
 
 repo_dir=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P) || exit 1
 config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
+data_home=${XDG_DATA_HOME:-"$HOME/.local/share"}
 
 links=(
   ".tmux.conf|$HOME/.tmux.conf"
   "alacritty|$config_home/alacritty"
   "nvim|$config_home/nvim"
+  "sway|$config_home/sway"
+  "waybar|$config_home/waybar"
+  "wofi|$config_home/wofi"
+  "swaylock|$config_home/swaylock"
+  "dunst|$config_home/dunst"
+  "flameshot|$config_home/flameshot"
+  "xdg-desktop-portal/sway-portals.conf|$config_home/xdg-desktop-portal/sway-portals.conf"
+  "systemd/user/dotfiles-sway-session.target|$config_home/systemd/user/dotfiles-sway-session.target"
+  "gtk-3.0|$config_home/gtk-3.0"
+  "gtk-4.0|$config_home/gtk-4.0"
+  "Kvantum|$config_home/Kvantum"
+  "environment.d/90-catppuccin.conf|$config_home/environment.d/90-catppuccin.conf"
+  "themes/catppuccin-macchiato-blue-standard+default|$data_home/themes/catppuccin-macchiato-blue-standard+default"
+  "media|$data_home/backgrounds/dotfiles"
 )
 
 link_file() {
@@ -48,5 +63,10 @@ status=0
 for entry in "${links[@]}"; do
   link_file "${entry%%|*}" "${entry#*|}" || status=1
 done
+
+# This can be disabled during tests or non-interactive installations.
+if [[ ${DOTFILES_SKIP_THEME_APPLY:-0} != 1 ]]; then
+  "$repo_dir/scripts/apply-theme.sh" || status=1
+fi
 
 exit "$status"

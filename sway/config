@@ -1,0 +1,168 @@
+# Sway — Catppuccin Macchiato
+set $mod Mod4
+set $theme_env env XDG_CURRENT_DESKTOP=sway XDG_SESSION_DESKTOP=sway GTK_THEME=catppuccin-macchiato-blue-standard+default QT_STYLE_OVERRIDE=kvantum QT_QPA_PLATFORMTHEME=gtk3 QT_QPA_PLATFORM=wayland
+set $term $theme_env alacritty
+set $menu $theme_env wofi --show drun --allow-images
+
+# Window gaps and borders, in logical pixels.
+set $gaps 3
+set $border 3
+
+font pango:JetBrainsMono Nerd Font 10
+
+### Appearance
+output * bg #24273a solid_color
+# Resolve the wallpaper through XDG_DATA_HOME and apply it to every output.
+exec_always --no-startup-id sh -c 'data_home=${XDG_DATA_HOME:-"$HOME/.local/share"}; exec swaymsg output "*" bg "$data_home/backgrounds/dotfiles/leaves_line_neon_139772_2560x1600.jpg" fill'
+# Use 125% scaling on the laptop's built-in display.
+output eDP-1 scale 1.25
+
+gaps inner $gaps
+gaps outer $gaps
+default_border pixel $border
+default_floating_border pixel $border
+hide_edge_borders none
+
+#                    border   background text     indicator child_border
+client.focused          #8aadf4 #8aadf4 #24273a #8aadf4    #8aadf4
+client.focused_inactive #494d64 #24273a #cad3f5 #494d64    #494d64
+client.unfocused        #363a4f #24273a #a5adcb #363a4f    #363a4f
+client.urgent           #ed8796 #ed8796 #24273a #eed49f    #ed8796
+client.placeholder      #5b6078 #24273a #cad3f5 #5b6078    #5b6078
+client.background       #24273a
+
+### Input
+input type:keyboard {
+    xkb_layout it
+    repeat_delay 300
+    repeat_rate 40
+}
+
+input type:touchpad {
+    tap enabled
+    natural_scroll enabled
+    dwt enabled
+}
+
+seat * hide_cursor 5000
+
+### Startup
+exec --no-startup-id $theme_env sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec "$config_home/sway/scripts/session.sh"'
+exec_always --no-startup-id sh -c 'pkill waybar 2>/dev/null || true; exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_DESKTOP=sway GTK_THEME=catppuccin-macchiato-blue-standard+default QT_STYLE_OVERRIDE=kvantum QT_QPA_PLATFORMTHEME=gtk3 QT_QPA_PLATFORM=wayland waybar'
+exec_always --no-startup-id sh -c 'pkill dunst 2>/dev/null || true; exec dunst'
+exec_always --no-startup-id sh -c 'pkill -f "[c]lipboard-history.sh" 2>/dev/null || true; exec "$HOME/.config/sway/scripts/clipboard-history.sh"'
+# Automatic Fibonacci arrangement with 61.8% / 38.2% proportions.
+exec_always --no-startup-id sh -c 'pkill -f "[g]olden-layout.sh" 2>/dev/null || true; exec "$HOME/.config/sway/scripts/golden-layout.sh"'
+# Turn off idle displays without locking the session automatically.
+exec swayidle -w \
+    timeout 600 'swaymsg "output * power off"' \
+    resume 'swaymsg "output * power on"'
+
+### Applications
+bindsym $mod+Return exec $term
+bindsym $mod+d exec $menu
+# Mod+l is already used to move focus to the right.
+bindsym $mod+Ctrl+l exec swaylock
+bindsym $mod+q kill
+bindsym Print exec $theme_env flameshot gui
+bindsym Shift+Print exec $theme_env flameshot full --clipboard
+bindsym $mod+n exec dunstctl history-pop
+bindsym $mod+Shift+n exec dunstctl close-all
+bindsym $mod+Ctrl+n exec dunstctl set-paused toggle
+
+# Audio and brightness
+bindsym XF86AudioRaiseVolume exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/volume.sh" up'
+bindsym XF86AudioLowerVolume exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/volume.sh" down'
+bindsym XF86AudioMute exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/volume.sh" mute'
+bindsym XF86AudioMicMute exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/volume.sh" mic-mute'
+bindsym XF86MonBrightnessUp exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/brightness.sh" up'
+bindsym XF86MonBrightnessDown exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/brightness.sh" down'
+
+### Focus and movement
+set $left h
+set $down j
+set $up k
+set $right l
+
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+### Workspace
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "10"
+
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
+bindsym $mod+6 workspace number $ws6
+bindsym $mod+7 workspace number $ws7
+bindsym $mod+8 workspace number $ws8
+bindsym $mod+9 workspace number $ws9
+bindsym $mod+0 workspace number $ws10
+
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
+bindsym $mod+Shift+6 move container to workspace number $ws6
+bindsym $mod+Shift+7 move container to workspace number $ws7
+bindsym $mod+Shift+8 move container to workspace number $ws8
+bindsym $mod+Shift+9 move container to workspace number $ws9
+bindsym $mod+Shift+0 move container to workspace number $ws10
+
+### Layout
+# The layout is selected automatically; these bindings remain available only
+# as manual overrides.
+bindsym $mod+b splith
+bindsym $mod+v splitv
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+bindsym $mod+a focus parent
+
+mode "resize" {
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+### Session
+bindsym $mod+Shift+c reload
+# Open the session menu from Waybar's power button.

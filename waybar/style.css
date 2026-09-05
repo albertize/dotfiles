@@ -1,0 +1,122 @@
+@define-color rosewater #f4dbd6;
+@define-color flamingo #f0c6c6;
+@define-color pink #f5bde6;
+@define-color mauve #c6a0f6;
+@define-color red #ed8796;
+@define-color maroon #ee99a0;
+@define-color peach #f5a97f;
+@define-color yellow #eed49f;
+@define-color green #a6da95;
+@define-color teal #8bd5ca;
+@define-color sky #91d7e3;
+@define-color sapphire #7dc4e4;
+@define-color blue #8aadf4;
+@define-color lavender #b7bdf8;
+@define-color text #cad3f5;
+@define-color subtext0 #a5adcb;
+@define-color overlay0 #6e738d;
+@define-color surface0 #363a4f;
+@define-color surface1 #494d64;
+@define-color base #24273a;
+@define-color mantle #1e2030;
+@define-color crust #181926;
+
+* {
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 11px;
+}
+
+window#waybar {
+  color: @text;
+  background: alpha(@base, 0.98);
+  border-bottom: 1px solid @surface1;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+  background: transparent;
+}
+
+#workspaces button {
+  padding: 0 6px;
+  color: @subtext0;
+  background: transparent;
+}
+
+#workspaces button:hover {
+  color: @text;
+  background: @surface0;
+  box-shadow: none;
+}
+
+#workspaces button.focused,
+#workspaces button.active {
+  color: @crust;
+  background: @blue;
+}
+
+#workspaces button.urgent {
+  color: @crust;
+  background: @red;
+}
+
+#mode {
+  color: @crust;
+  background: @peach;
+}
+
+#clock,
+#idle_inhibitor,
+#pulseaudio,
+#network,
+#cpu,
+#memory,
+#battery,
+#tray,
+#mode,
+#custom-clipboard,
+#custom-power {
+  padding: 0 7px;
+}
+
+#clock { color: @blue; }
+#idle_inhibitor { color: @mauve; }
+#idle_inhibitor.activated { color: @green; }
+#pulseaudio { color: @teal; }
+#pulseaudio.muted { color: @overlay0; }
+#network { color: @sapphire; }
+#network.disconnected { color: @red; }
+#cpu { color: @mauve; }
+#memory { color: @pink; }
+#battery { color: @green; }
+#custom-clipboard {
+  margin-right: 5px;
+  color: @blue;
+}
+#custom-clipboard:hover { background: @surface0; }
+#battery.warning:not(.charging) { color: @yellow; }
+#battery.critical:not(.charging) {
+  color: @red;
+  animation: blink 0.6s steps(2) infinite alternate;
+}
+
+#custom-power {
+  color: @crust;
+  background: @red;
+}
+
+#custom-power:hover { background: @maroon; }
+
+tooltip {
+  color: @text;
+  background: @mantle;
+  border: 1px solid @surface1;
+}
+
+@keyframes blink {
+  to { color: @crust; background: @red; }
+}

@@ -1,0 +1,76 @@
+@define-color rosewater #f4dbd6;
+@define-color pink #f5bde6;
+@define-color mauve #c6a0f6;
+@define-color red #ed8796;
+@define-color peach #f5a97f;
+@define-color yellow #eed49f;
+@define-color green #a6da95;
+@define-color teal #8bd5ca;
+@define-color blue #8aadf4;
+@define-color text #cad3f5;
+@define-color subtext0 #a5adcb;
+@define-color overlay0 #6e738d;
+@define-color surface0 #363a4f;
+@define-color surface1 #494d64;
+@define-color base #24273a;
+@define-color mantle #1e2030;
+@define-color crust #181926;
+
+* {
+  border-radius: 0;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+}
+
+window {
+  margin: 0;
+  padding: 0;
+  color: @text;
+  background-color: @base;
+  border: 1px solid @blue;
+}
+
+#outer-box {
+  margin: 6px;
+  padding: 0;
+}
+
+#input {
+  min-height: 22px;
+  margin-bottom: 6px;
+  padding: 0 8px;
+  color: @text;
+  background-color: @mantle;
+  border: 1px solid @surface1;
+  outline: none;
+  box-shadow: none;
+}
+
+#input:focus { border-color: @blue; }
+
+#scroll {
+  margin: 0;
+  padding: 0;
+}
+
+#inner-box { background-color: transparent; }
+
+#entry {
+  min-height: 26px;
+  padding: 0 8px;
+  color: @subtext0;
+  background-color: transparent;
+}
+
+#entry:selected {
+  color: @crust;
+  background-color: @blue;
+  outline: none;
+}
+
+#img {
+  margin-right: 8px;
+}
+
+#text { color: inherit; }
+#text:selected { color: @crust; }

@@ -1,0 +1,28 @@
+# Catppuccin Macchiato
+color=24273a
+font=JetBrainsMono Nerd Font
+font-size=20
+indicator-radius=100
+indicator-thickness=5
+inside-color=24273a
+inside-clear-color=24273a
+inside-ver-color=24273a
+inside-wrong-color=24273a
+ring-color=8aadf4
+ring-clear-color=eed49f
+ring-ver-color=8bd5ca
+ring-wrong-color=ed8796
+line-color=00000000
+line-clear-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+separator-color=00000000
+key-hl-color=a6da95
+bs-hl-color=ed8796
+text-color=cad3f5
+text-clear-color=eed49f
+text-ver-color=8bd5ca
+text-wrong-color=ed8796
+show-failed-attempts
+ignore-empty-password
+daemonize

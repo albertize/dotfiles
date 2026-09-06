@@ -16,8 +16,10 @@ Personal configuration files for:
 Sway, Waybar, Wofi, Swaylock, GTK, and Qt use Catppuccin Macchiato with the
 Blue accent. Window borders and gaps are set to three logical pixels through
 `$border` and `$gaps` in `sway/config`. The built-in `eDP-1` display uses 125%
-scaling; use `swaymsg -t get_outputs` to find the correct output name on a
-different machine.
+scaling and is centered below the `HDMI-A-1` external display. Waybar prefers
+the upper external display and automatically moves to the laptop panel when the
+external display is disconnected. Use `swaymsg -t get_outputs` to find the
+correct output names on a different machine.
 
 ## Sway requirements
 

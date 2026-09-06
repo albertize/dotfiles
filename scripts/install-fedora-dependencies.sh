@@ -21,10 +21,13 @@ packages=(
   flameshot
   fontconfig
   git-core
+  gnome-keyring
+  gnome-keyring-pam
   google-noto-sans-fonts
   jq
   kvantum
   libnotify
+  libsecret
   lightdm
   lightdm-gtk
   NetworkManager
@@ -113,29 +116,34 @@ if $check_only; then
   exit 0
 fi
 
-if (( ${#missing_packages[@]} == 0 )) && $font_installed; then
-  exit 0
-fi
-
-if ! $assume_yes; then
-  printf 'Continue with package and font installation? [y/N] '
-  read -r answer
-  case $answer in
-    y|Y) ;;
-    *) printf 'Cancelled.\n'; exit 0 ;;
-  esac
-fi
-
-if (( ${#missing_packages[@]} > 0 )); then
-  dnf_command=(dnf)
-  if (( EUID != 0 )); then
-    command -v sudo >/dev/null 2>&1 || {
-      printf 'sudo is required to install Fedora packages.\n' >&2
-      exit 1
-    }
-    dnf_command=(sudo dnf)
+if (( ${#missing_packages[@]} > 0 )) || ! $font_installed; then
+  if ! $assume_yes; then
+    printf 'Continue with package and font installation? [y/N] '
+    read -r answer
+    case $answer in
+      y|Y) ;;
+      *) printf 'Cancelled.\n'; exit 0 ;;
+    esac
   fi
-  "${dnf_command[@]}" install --assumeyes "${missing_packages[@]}"
+
+  if (( ${#missing_packages[@]} > 0 )); then
+    dnf_command=(dnf)
+    if (( EUID != 0 )); then
+      command -v sudo >/dev/null 2>&1 || {
+        printf 'sudo is required to install Fedora packages.\n' >&2
+        exit 1
+      }
+      dnf_command=(sudo dnf)
+    fi
+    "${dnf_command[@]}" install --assumeyes "${missing_packages[@]}"
+  fi
+fi
+
+if command -v systemctl >/dev/null 2>&1 &&
+   systemctl --user cat gnome-keyring-daemon.socket >/dev/null 2>&1; then
+  systemctl --user daemon-reload
+  systemctl --user enable --now gnome-keyring-daemon.socket
+  systemctl --user try-restart xdg-desktop-portal.service 2>/dev/null || true
 fi
 
 if ! $font_installed; then

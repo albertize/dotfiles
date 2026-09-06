@@ -24,6 +24,7 @@ different machine.
 - `sway`, `swayidle`, `swaylock`, `waybar`, `wofi`, and `dunst`
 - `alacritty`, PipeWire/WirePlumber, `brightnessctl`, `jq`, and `nmcli`
 - `cliphist` and `wl-clipboard` for clipboard history
+- `gnome-keyring`, `gnome-keyring-pam`, and `libsecret` for secret storage
 - `flameshot`, `xdg-desktop-portal`, `xdg-desktop-portal-wlr`, and
   `xdg-desktop-portal-gtk`
 - `lightdm`, `lightdm-gtk`, and `xorg-x11-server-Xorg` for the login manager
@@ -44,6 +45,9 @@ upstream sources, and licenses.
 
 - LightDM GTK provides the login screen with the same wallpaper, Catppuccin
   theme, Adwaita icons, Noto Sans font, and Sway as the default session.
+- LightDM unlocks the login keyring through PAM; GNOME Keyring exposes the
+  standard Secret Service API and the secret portal to native and sandboxed
+  applications.
 - `Mod+d` opens Wofi with application icons.
 - `Mod+Ctrl+l` locks the session manually.
 - Automatic locking is disabled; idle displays turn off after ten minutes.

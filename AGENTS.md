@@ -76,6 +76,8 @@ changes portable, reviewable, and safe to apply repeatedly.
 - Waybar modules should remain functional without a full desktop environment.
 - Keep notifications and screenshots desktop-agnostic through Dunst, Flameshot,
   and the appropriate freedesktop portal backend.
+- Use GNOME Keyring only through its standard Secret Service and portal APIs;
+  do not require a GNOME desktop session.
 - Wofi is the common launcher for interactive menus and should retain app icons
   in `drun` mode.
 - Keep GTK and Qt palette/background/foreground combinations readable; verify

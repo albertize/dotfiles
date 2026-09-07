@@ -7,6 +7,15 @@ set -u
 gtk_theme='catppuccin-macchiato-blue-standard+default'
 kvantum_theme='catppuccin-macchiato-blue'
 
+if command -v gsettings >/dev/null 2>&1 &&
+   gsettings list-schemas | grep -qx 'org.gnome.desktop.interface'; then
+  gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" || true
+  gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' || true
+  gsettings set org.gnome.desktop.interface icon-theme 'Adwaita' || true
+  gsettings set org.gnome.desktop.interface cursor-theme 'Adwaita' || true
+  gsettings set org.gnome.desktop.interface font-name 'Noto Sans 10' || true
+fi
+
 # The Kvantum file is already reproducible, but this refreshes any engine
 # caches when Kvantum is installed.
 if command -v kvantummanager >/dev/null 2>&1; then

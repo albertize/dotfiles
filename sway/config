@@ -59,6 +59,7 @@ seat * hide_cursor 5000
 ### Startup
 exec --no-startup-id $theme_env sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec "$config_home/sway/scripts/session.sh"'
 exec_always --no-startup-id sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_DESKTOP=sway GTK_THEME=catppuccin-macchiato-blue-standard+default QT_STYLE_OVERRIDE=kvantum QT_QPA_PLATFORMTHEME=gtk3 QT_QPA_PLATFORM=wayland "$config_home/waybar/scripts/output-manager.sh"'
+exec_always --no-startup-id sh -c 'pkill xsettingsd 2>/dev/null || true; config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec xsettingsd --config="$config_home/xsettingsd/xsettingsd.conf"'
 exec_always --no-startup-id sh -c 'pkill dunst 2>/dev/null || true; exec dunst'
 exec_always --no-startup-id sh -c 'pkill -f "[c]lipboard-history.sh" 2>/dev/null || true; exec "$HOME/.config/sway/scripts/clipboard-history.sh"'
 # Automatic Fibonacci arrangement with 61.8% / 38.2% proportions.

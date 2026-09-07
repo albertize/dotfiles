@@ -24,6 +24,7 @@ links=(
   "gtk-4.0|$config_home/gtk-4.0"
   "Kvantum|$config_home/Kvantum"
   "environment.d/90-catppuccin.conf|$config_home/environment.d/90-catppuccin.conf"
+  "xsettingsd|$config_home/xsettingsd"
   "themes/catppuccin-macchiato-blue-standard+default|$data_home/themes/catppuccin-macchiato-blue-standard+default"
   "media|$data_home/backgrounds/dotfiles"
 )

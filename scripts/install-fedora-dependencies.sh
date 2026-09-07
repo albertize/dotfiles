@@ -24,6 +24,7 @@ packages=(
   gnome-keyring
   gnome-keyring-pam
   google-noto-sans-fonts
+  gsettings-desktop-schemas
   jq
   kvantum
   libnotify
@@ -50,6 +51,7 @@ packages=(
   xdg-desktop-portal-wlr
   xdg-utils
   xorg-x11-server-Xorg
+  xsettingsd
   xz
 )
 

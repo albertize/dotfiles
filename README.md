@@ -33,15 +33,18 @@ correct output names on a different machine.
 - JetBrainsMono Nerd Font for text and icons
 - `pavucontrol` optionally, for the volume module's right-click action
 - Kvantum and GTK 3 platform-theme plugins for Qt 5 and Qt 6
-- Noto Sans and the Adwaita icon/cursor theme
+- Noto Sans, the Adwaita icon/cursor theme, and `xsettingsd`
 
 The official Catppuccin GTK and Kvantum themes are vendored in this
 repository and linked by the installer. Sway passes the theme variables to new
 applications explicitly, while `environment.d` makes them globally available
 from the next login. A managed systemd user target registers Sway as a graphical
 session so portal-based screenshots work even when Sway is started manually.
-See [`themes/README.md`](themes/README.md) for versions,
-upstream sources, and licenses.
+See [`themes/README.md`](themes/README.md) for versions, upstream sources, and
+licenses.
+The same dark theme, icon, cursor, font, DPI, and antialiasing values are
+published through GSettings and XSettings so applications do not need
+application-specific overrides.
 
 ## Desktop behavior
 
@@ -117,6 +120,7 @@ It creates these symbolic links:
 - `${XDG_CONFIG_HOME:-~/.config}/Kvantum` → `Kvantum/`
 - `${XDG_CONFIG_HOME:-~/.config}/environment.d/90-catppuccin.conf` →
   `environment.d/90-catppuccin.conf`
+- `${XDG_CONFIG_HOME:-~/.config}/xsettingsd` → `xsettingsd/`
 - `${XDG_DATA_HOME:-~/.local/share}/themes/catppuccin-macchiato-blue-standard+default`
   → the vendored GTK theme
 - `${XDG_DATA_HOME:-~/.local/share}/backgrounds/dotfiles` → `media/`

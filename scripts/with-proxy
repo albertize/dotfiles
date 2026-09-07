@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Run a command with the corporate proxy environment resolved at start-up.
+#
+# Sway does not provide the desktop-integrated proxy configuration that
+# GNOME/KDE expose to Chromium, so graphical applications started from the
+# launcher inherit no proxy at all: the shell helper in ~/.bashrc.d/40-autoproxy
+# only runs for interactive Bash. On VPN the default route points at the tunnel
+# and the corporate proxy is mandatory, so those applications cannot reach the
+# network.
+#
+# The proxy state is evaluated per invocation rather than imported once into the
+# session environment, because the VPN goes up and down while the session keeps
+# running and a stale PAC URL makes Chromium fail every request instead of
+# falling back to a direct connection.
+#
+# Usage: with-proxy <command> [arguments...]
+set -u
+
+if [[ $# -eq 0 ]]; then
+  printf 'Usage: %s <command> [arguments...]\n' "${0##*/}" >&2
+  exit 2
+fi
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
+# shellcheck source=./proxy-env.sh
+if ! source -- "$script_dir/proxy-env.sh"; then
+  printf '%s: unable to load proxy-env.sh, running without proxy\n' "${0##*/}" >&2
+else
+  proxy_env_apply || true
+fi
+
+exec -- "$@"

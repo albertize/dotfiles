@@ -128,3 +128,39 @@ It creates these symbolic links:
 If a destination already exists, the installer asks for confirmation before
 replacing it. Set `DOTFILES_SKIP_THEME_APPLY=1` to create links without changing
 the live GTK, Qt, systemd, or D-Bus settings.
+
+## Proxy handling
+
+Chromium-based applications choose where to read the proxy configuration from
+based on the desktop they detect: GNOME-like sessions read the
+`org.gnome.system.proxy` GSettings schema, KDE reads `kioslaverc`, and any other
+session — Sway included — falls back to the `http_proxy`/`https_proxy`
+environment variables. Under Sway those variables are therefore the supported
+channel, but they are normally exported only by interactive shells, so
+applications started from the launcher inherit no proxy at all.
+
+`scripts/proxy-env.sh` is the single place that resolves the proxy state, and
+`scripts/with-proxy` runs any command with the result applied:
+
+```sh
+scripts/with-proxy chromium-browser
+```
+
+The state is evaluated per invocation instead of being imported once into the
+session environment, because a VPN is connected and disconnected while the
+session keeps running, and Chromium does not fall back to a direct connection
+when a configured PAC URL becomes unreachable — it fails every request instead.
+Restarting the application is enough to pick up the new state.
+
+Site-specific host names are not stored in this repository. Copy
+`scripts/proxy-env.conf.example` to `${XDG_CONFIG_HOME:-~/.config}/proxy-env.conf`
+and set the values for your network; without that file no proxy is used, so the
+helpers are harmless on machines outside a corporate network.
+
+Application launchers that need the wrapper stay outside this repository when the
+application is installed on a single machine. Wrap the command in the local
+`.desktop` entry instead:
+
+```
+Exec=/path/to/dotfiles/scripts/with-proxy /usr/bin/some-application %U
+```

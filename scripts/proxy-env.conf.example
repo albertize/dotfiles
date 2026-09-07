@@ -1,0 +1,24 @@
+# Site-specific proxy configuration for scripts/proxy-env.sh.
+#
+# Copy this file to "$XDG_CONFIG_HOME/proxy-env.conf" (usually
+# ~/.config/proxy-env.conf) and fill in the values for your network. The file is
+# sourced by Bash, so it must contain plain variable assignments only.
+#
+# It is intentionally kept out of version control: corporate host names are
+# infrastructure details that do not belong in a public repository.
+#
+# Never store credentials here. If the proxy requires authentication, rely on
+# the system keyring or Kerberos instead of embedding a password in a URL.
+
+# Proxy host and port. Leave PROXY_ENV_HOST empty to disable proxy handling
+# entirely; every helper then reports that no proxy is available.
+PROXY_ENV_HOST=proxy.example.com
+PROXY_ENV_PORT=8080
+
+# Optional proxy auto-configuration URL. When set, Chromium-based applications
+# use it through auto_proxy and honour the PAC file's DIRECT rules, which keeps
+# non-corporate traffic off the proxy.
+PROXY_ENV_PAC_URL=http://pac.example.com/proxy.pac
+
+# Comma-separated hosts and domains that must bypass the proxy.
+PROXY_ENV_NO_PROXY=localhost,127.0.0.1,::1,.internal.example.com

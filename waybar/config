@@ -10,7 +10,7 @@
 
   "modules-left": ["sway/workspaces", "sway/mode"],
   "modules-center": ["clock"],
-  "modules-right": ["idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "battery", "tray", "custom/clipboard", "custom/power"],
+  "modules-right": ["idle_inhibitor", "bluetooth", "pulseaudio", "network", "cpu", "memory", "battery", "tray", "custom/clipboard", "custom/power"],
 
   "sway/workspaces": {
     "disable-scroll": true,
@@ -34,6 +34,18 @@
     },
     "tooltip-format-activated": "Sospensione automatica disattivata",
     "tooltip-format-deactivated": "Sospensione automatica attiva"
+  },
+  "bluetooth": {
+    "format": "",
+    "format-disabled": "󰂲",
+    "format-off": "󰂲",
+    "format-on": "",
+    "format-connected": "󰂱  {num_connections}",
+    "format-no-controller": "",
+    "tooltip-format": "{controller_alias}\nBluetooth: {status}\nClick: gestisci i dispositivi",
+    "tooltip-format-connected": "{controller_alias}\nDispositivi connessi: {num_connections}\n{device_enumerate}\nClick: gestisci i dispositivi",
+    "tooltip-format-enumerate-connected": "  {device_alias}",
+    "on-click": "~/.config/waybar/scripts/bluetooth-menu.sh"
   },
   "pulseaudio": {
     "scroll-step": 5,

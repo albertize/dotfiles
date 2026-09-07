@@ -71,6 +71,7 @@ window#waybar {
 
 #clock,
 #idle_inhibitor,
+#bluetooth,
 #pulseaudio,
 #network,
 #cpu,
@@ -86,6 +87,11 @@ window#waybar {
 #clock { color: @blue; }
 #idle_inhibitor { color: @mauve; }
 #idle_inhibitor.activated { color: @green; }
+#bluetooth { color: @blue; }
+#bluetooth.connected { color: @teal; }
+#bluetooth.disabled,
+#bluetooth.off { color: @overlay0; }
+#bluetooth:hover { background: @surface0; }
 #pulseaudio { color: @teal; }
 #pulseaudio.muted { color: @overlay0; }
 #network { color: @sapphire; }

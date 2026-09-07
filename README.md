@@ -25,6 +25,7 @@ correct output names on a different machine.
 
 - `sway`, `swayidle`, `swaylock`, `waybar`, `wofi`, and `dunst`
 - `alacritty`, PipeWire/WirePlumber, `brightnessctl`, `jq`, and `nmcli`
+- BlueZ (`bluetoothctl`) and `rfkill` for Bluetooth and device management
 - `cliphist` and `wl-clipboard` for clipboard history
 - `gnome-keyring`, `gnome-keyring-pam`, and `libsecret` for secret storage
 - `flameshot`, `xdg-desktop-portal`, `xdg-desktop-portal-wlr`, and
@@ -69,6 +70,9 @@ application-specific overrides.
 - Clicking Waybar's network indicator opens a Wofi and `nmcli` menu that can
   toggle Wi-Fi, scan, connect to visible or hidden networks, request a password,
   and disconnect.
+- Waybar shows the Bluetooth state and connected-device count; clicking it opens
+  a Wofi and `bluetoothctl` menu that can toggle Bluetooth, scan, pair, connect,
+  disconnect, trust, or remove devices.
 
 ## Installation
 

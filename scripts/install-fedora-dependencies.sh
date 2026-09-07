@@ -14,6 +14,7 @@ readonly font_version_file="$font_dir/.version"
 packages=(
   adwaita-icon-theme
   alacritty
+  bluez
   brightnessctl
   cliphist
   curl
@@ -42,6 +43,7 @@ packages=(
   swayidle
   swaylock
   tmux
+  util-linux
   waybar
   wireplumber
   wl-clipboard

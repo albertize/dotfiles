@@ -13,6 +13,9 @@ readonly greeter_config_backup='/etc/lightdm/lightdm-gtk-greeter.conf.before-dot
 readonly old_greeter_dropin='/etc/lightdm/lightdm-gtk-greeter.conf.d/50-dotfiles.conf'
 readonly system_theme="/usr/share/themes/$theme_name"
 readonly system_wallpaper="/usr/share/backgrounds/dotfiles/$wallpaper_name"
+readonly data_home=${XDG_DATA_HOME:-"$HOME/.local/share"}
+readonly font_source="$data_home/fonts/JetBrainsMonoNerdFont"
+readonly system_font='/usr/local/share/fonts/JetBrainsMonoNerdFont'
 
 assume_yes=false
 check_only=false
@@ -61,6 +64,10 @@ check_configuration() {
     printf 'The system-wide GTK theme is not installed.\n' >&2
     status=1
   }
+  [[ -r $system_font/JetBrainsMonoNerdFont-Regular.ttf ]] || {
+    printf 'The system-wide JetBrainsMono Nerd Font is not installed.\n' >&2
+    status=1
+  }
   systemctl is-enabled lightdm.service >/dev/null 2>&1 || {
     printf 'LightDM is not enabled.\n' >&2
     status=1
@@ -75,7 +82,7 @@ if $check_only; then
   exit 0
 fi
 
-for command in lightdm lightdm-gtk-greeter; do
+for command in fc-cache lightdm lightdm-gtk-greeter; do
   command -v "$command" >/dev/null 2>&1 || {
     printf '%s is missing; run scripts/install-fedora-dependencies.sh first.\n' \
       "$command" >&2
@@ -83,9 +90,14 @@ for command in lightdm lightdm-gtk-greeter; do
   }
 done
 
+[[ -r $font_source/JetBrainsMonoNerdFont-Regular.ttf ]] || {
+  printf 'JetBrainsMono Nerd Font is missing; run scripts/install-fedora-dependencies.sh first.\n' >&2
+  exit 1
+}
+
 if ! $assume_yes; then
-  printf '%s\n' 'This will install files under /etc and /usr/share, replace the managed'
-  printf '%s\n' 'system theme directory and greeter configuration, and enable LightDM.'
+  printf '%s\n' 'This will install files under /etc, /usr/share, and /usr/local/share;'
+  printf '%s\n' 'replace the managed theme and greeter configuration; and enable LightDM.'
   printf '%s\n' 'The original greeter configuration is backed up before replacement.'
   printf 'Continue? [y/N] '
   read -r answer
@@ -103,6 +115,20 @@ else
     exit 1
   }
   sudo_command=(sudo)
+fi
+
+# Remove files and quiet-boot arguments installed by the previous greetd
+# experiment. This is conditional so unrelated greetd installations are left
+# untouched.
+legacy_greetd_dropin='/etc/systemd/system/greetd.service.d/10-catppuccin-console.conf'
+if [[ -e $legacy_greetd_dropin ]]; then
+  "${sudo_command[@]}" rm -f -- "$legacy_greetd_dropin" \
+    /etc/greetd/catppuccin-vtrgb
+  if command -v grubby >/dev/null 2>&1; then
+    "${sudo_command[@]}" grubby --update-kernel=ALL \
+      --remove-args='loglevel=0 systemd.show_status=false rd.systemd.show_status=false'
+  fi
+  "${sudo_command[@]}" systemctl daemon-reload
 fi
 
 "${sudo_command[@]}" install -D -m 0644 \
@@ -123,9 +149,16 @@ fi
   "$repo_dir/themes/$theme_name" "$system_theme"
 "${sudo_command[@]}" chown -R root:root -- "$system_theme"
 
+"${sudo_command[@]}" install -d -m 0755 -- "$(dirname -- "$system_font")"
+"${sudo_command[@]}" rm -rf -- "$system_font"
+"${sudo_command[@]}" cp -a -- "$font_source" "$system_font"
+"${sudo_command[@]}" chown -R root:root -- "$system_font"
+"${sudo_command[@]}" fc-cache -f "$system_font" >/dev/null
+
 if command -v restorecon >/dev/null 2>&1; then
   "${sudo_command[@]}" restorecon -RF \
-    "$lightdm_config" "$greeter_config" "$system_wallpaper" "$system_theme"
+    "$lightdm_config" "$greeter_config" "$system_wallpaper" "$system_theme" \
+    "$system_font"
 fi
 
 current_manager=$(basename -- "$(readlink -f /etc/systemd/system/display-manager.service 2>/dev/null || true)")

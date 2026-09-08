@@ -56,8 +56,8 @@ such as Dolphin, while preserving all other KDE settings.
 ## Desktop behavior
 
 - LightDM GTK provides the login screen with the same wallpaper, Catppuccin
-  theme, Adwaita icons, JetBrainsMono Nerd Font, and Sway as the default
-  session.
+  theme, Adwaita icons, system-wide JetBrainsMono Nerd Font, native 96 DPI, and
+  Sway as the default session.
 - LightDM unlocks the login keyring through PAM; GNOME Keyring exposes the
   standard Secret Service API and the secret portal to native and sandboxed
   applications.
@@ -107,9 +107,10 @@ Install the managed LightDM configuration and enable it for the next boot with:
 ./scripts/configure-lightdm.sh
 ```
 
-This copies the wallpaper and GTK theme to system-readable locations, installs
-the LightDM drop-in and GTK greeter configuration under `/etc/lightdm`, and
-asks for confirmation before using `sudo`. The original greeter configuration
+This copies the wallpaper, GTK theme, and JetBrainsMono Nerd Font to
+system-readable locations, installs the LightDM drop-in and GTK greeter
+configuration under `/etc/lightdm`, and asks for confirmation before using
+`sudo`. The original greeter configuration
 is backed up once. It does not stop the active graphical session. Use
 `./scripts/configure-lightdm.sh --check` for a read-only verification.
 

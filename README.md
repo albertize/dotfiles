@@ -14,7 +14,8 @@ Personal configuration files for:
 - [Shell prompt](promptrc) — not installed automatically
 
 Sway, Waybar, Wofi, Swaylock, GTK, and Qt use Catppuccin Macchiato with the
-Blue accent. Window borders and gaps are set to three logical pixels through
+Blue accent. Desktop applications use the vendored Papirus-Dark icon theme
+with violet folders. Window borders and gaps are set to three logical pixels through
 `$border` and `$gaps` in `sway/config`. The built-in `eDP-1` display uses 125%
 scaling and is centered below the `HDMI-A-1` external display. Waybar prefers
 the upper external display and automatically moves to the laptop panel when the
@@ -34,18 +35,21 @@ correct output names on a different machine.
 - JetBrainsMono Nerd Font for text and icons
 - `pavucontrol` optionally, for the volume module's right-click action
 - Kvantum and GTK 3 platform-theme plugins for Qt 5 and Qt 6
-- Noto Sans, the Adwaita icon/cursor theme, and `xsettingsd`
+- Noto Sans, the Adwaita cursor theme, and `xsettingsd`
 
-The official Catppuccin GTK and Kvantum themes are vendored in this
-repository and linked by the installer. Sway passes the theme variables to new
+The official Catppuccin GTK and Kvantum themes and the Papirus-Dark icon theme
+are vendored in this repository. The installer links the toolkit themes and
+extracts the pinned Papirus archive into `XDG_DATA_HOME/icons`. Sway passes the theme variables to new
 applications explicitly, while `environment.d` makes them globally available
 from the next login. A managed systemd user target registers Sway as a graphical
 session so portal-based screenshots work even when Sway is started manually.
 See [`themes/README.md`](themes/README.md) for versions, upstream sources, and
 licenses.
-The same dark theme, icon, cursor, font, DPI, and antialiasing values are
-published through GSettings and XSettings so applications do not need
-application-specific overrides.
+The dark theme, Papirus-Dark icons, Adwaita cursor, font, DPI, and antialiasing
+values are published through GSettings and XSettings so applications do not
+need application-specific overrides. The theme application script also updates
+the `Icons/Theme` key in `kdeglobals` for KDE applications such as Dolphin,
+while preserving all other KDE settings.
 
 ## Desktop behavior
 
@@ -66,6 +70,8 @@ application-specific overrides.
   and `Mod+Ctrl+n` pauses or resumes Dunst.
 - Waybar's clipboard button opens history with Wofi; right-click deletes one
   entry and middle-click clears the entire history.
+- Right-clicking Waybar's battery indicator opens a Wofi menu for selecting the
+  battery-save, balanced, or performance power profile.
 - Waybar's power button provides lock, logout, and power-off actions.
 - Clicking Waybar's network indicator opens a Wofi and `nmcli` menu that can
   toggle Wi-Fi, scan, connect to visible or hidden networks, request a password,

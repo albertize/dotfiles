@@ -54,7 +54,8 @@ input type:touchpad {
     dwt enabled
 }
 
-seat * hide_cursor 5000
+# Keep the pointer visible even when it is idle.
+seat * hide_cursor 0
 
 ### Startup
 exec --no-startup-id $theme_env sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec "$config_home/sway/scripts/session.sh"'

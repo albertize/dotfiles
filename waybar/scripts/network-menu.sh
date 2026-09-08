@@ -6,11 +6,11 @@ readonly menu_width=380
 readonly menu_height=340
 readonly input_height=100
 readonly network_prefix='  '
-readonly enable_wifi='󰖩  Attiva Wi-Fi'
-readonly disable_wifi='󰖪  Disattiva Wi-Fi'
-readonly disconnect_wifi='󰤭  Disconnetti'
-readonly rescan_wifi='󰑐  Aggiorna reti'
-readonly hidden_wifi='󰛐  Rete nascosta'
+readonly enable_wifi='󰖩  Enable Wi-Fi'
+readonly disable_wifi='󰖪  Disable Wi-Fi'
+readonly disconnect_wifi='󰤭  Disconnect'
+readonly rescan_wifi='󰑐  Refresh networks'
+readonly hidden_wifi='󰛐  Hidden network'
 
 notify() {
   local urgency=$1
@@ -38,11 +38,11 @@ connect_wifi() {
   local output password
 
   if output=$(nmcli --wait 20 device wifi connect "$ssid" ifname "$device" 2>&1); then
-    notify normal "Connesso a $ssid"
+    notify normal "Connected to $ssid"
     return 0
   fi
 
-  password=$(ask "Password per $ssid" true) || return 0
+  password=$(ask "Password for $ssid" true) || return 0
   [[ -n $password ]] || {
     notify critical "$output"
     return 1
@@ -50,7 +50,7 @@ connect_wifi() {
 
   if output=$(nmcli --wait 30 device wifi connect "$ssid" password "$password" \
       ifname "$device" 2>&1); then
-    notify normal "Connesso a $ssid"
+    notify normal "Connected to $ssid"
   else
     notify critical "$output"
     return 1
@@ -61,9 +61,9 @@ connect_hidden_wifi() {
   local device=$1
   local ssid password output
 
-  ssid=$(ask 'Nome della rete nascosta') || return 0
+  ssid=$(ask 'Hidden network name') || return 0
   [[ -n $ssid ]] || return 0
-  password=$(ask "Password per $ssid (vuota se aperta)" true) || return 0
+  password=$(ask "Password for $ssid (leave empty if open)" true) || return 0
 
   if [[ -n $password ]]; then
     output=$(nmcli --wait 30 device wifi connect "$ssid" password "$password" \
@@ -79,22 +79,22 @@ connect_hidden_wifi() {
       }
   fi
 
-  notify normal "Connesso a $ssid"
+  notify normal "Connected to $ssid"
 }
 
 command -v nmcli >/dev/null 2>&1 || {
-  notify critical 'nmcli non è installato.'
+  notify critical 'nmcli is not installed.'
   exit 1
 }
 command -v wofi >/dev/null 2>&1 || {
-  notify critical 'wofi non è installato.'
+  notify critical 'Wofi is not installed.'
   exit 1
 }
 
 device=$(LC_ALL=C nmcli --escape no --get-values DEVICE,TYPE device status |
   awk -F: '$2 == "wifi" { print $1; exit }')
 [[ -n $device ]] || {
-  notify critical 'Nessuna scheda Wi-Fi rilevata.'
+  notify critical 'No Wi-Fi adapter detected.'
   exit 1
 }
 
@@ -135,7 +135,7 @@ while true; do
       ;;
     "$disconnect_wifi")
       nmcli device disconnect "$device" >/dev/null &&
-        notify normal "Disconnesso da $active_ssid"
+        notify normal "Disconnected from $active_ssid"
       exit 0
       ;;
     "$rescan_wifi")

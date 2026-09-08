@@ -2,12 +2,12 @@
 
 set -u
 
-lock='  Blocca schermo'
-logout='󰗽  Esci da Sway'
-poweroff='  Spegni il computer'
+lock='  Lock screen'
+logout='󰗽  Log out of Sway'
+poweroff='  Power off'
 
 choice=$(printf '%s\n%s\n%s\n' "$lock" "$logout" "$poweroff" |
-  wofi --dmenu --prompt 'Sessione' --insensitive --width 340 --height 135) || exit 0
+  wofi --dmenu --prompt 'Session' --insensitive --width 340 --height 135) || exit 0
 
 case "$choice" in
   "$lock")
@@ -17,8 +17,8 @@ case "$choice" in
     swaymsg exit
     ;;
   "$poweroff")
-    confirm=$(printf 'No\nSì\n' | wofi --dmenu --prompt 'Confermi lo spegnimento?' \
+    confirm=$(printf 'No\nYes\n' | wofi --dmenu --prompt 'Power off the computer?' \
       --insensitive --width 340 --height 100) || exit 0
-    [[ "$confirm" == 'Sì' ]] && systemctl poweroff
+    [[ $confirm == Yes ]] && systemctl poweroff
     ;;
 esac

@@ -43,6 +43,7 @@ packages=(
   swayidle
   swaylock
   tmux
+  tuned-ppd
   util-linux
   waybar
   wireplumber

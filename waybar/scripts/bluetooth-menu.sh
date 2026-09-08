@@ -5,16 +5,16 @@ set -u
 readonly menu_width=430
 readonly menu_height=360
 readonly input_height=135
-readonly enable_bluetooth='  Attiva Bluetooth'
-readonly disable_bluetooth='󰂲  Disattiva Bluetooth'
-readonly scan_devices='󰑐  Cerca dispositivi'
-readonly connect_device='󰂱  Connetti'
-readonly disconnect_device='󰂲  Disconnetti'
-readonly pair_device='󰌹  Associa'
-readonly trust_device='󰌾  Considera attendibile'
-readonly untrust_device='󰌿  Rimuovi attendibilità'
-readonly remove_device='󰆴  Rimuovi dispositivo'
-readonly back='󰁍  Indietro'
+readonly enable_bluetooth='  Enable Bluetooth'
+readonly disable_bluetooth='󰂲  Disable Bluetooth'
+readonly scan_devices='󰑐  Scan for devices'
+readonly connect_device='󰂱  Connect'
+readonly disconnect_device='󰂲  Disconnect'
+readonly pair_device='󰌹  Pair'
+readonly trust_device='󰌾  Trust'
+readonly untrust_device='󰌿  Untrust'
+readonly remove_device='󰆴  Remove device'
+readonly back='󰁍  Back'
 readonly connected_prefix='󰂱  '
 readonly paired_prefix='󰂯  '
 readonly available_prefix='  '
@@ -75,7 +75,7 @@ set_power() {
   # asking BlueZ to power it on again; hard blocks still require a hardware key.
   if [[ $state == on ]] && command -v rfkill >/dev/null 2>&1; then
     if ! unblock_output=$(LC_ALL=C rfkill unblock bluetooth 2>&1); then
-      failed_action 'Impossibile sbloccare il Bluetooth.' "$unblock_output"
+      failed_action 'Unable to unblock Bluetooth.' "$unblock_output"
       return 1
     fi
     sleep 0.5
@@ -87,7 +87,7 @@ set_power() {
     return 0
   fi
 
-  failed_action 'Impossibile cambiare lo stato del Bluetooth.' "$output"
+  failed_action 'Unable to change the Bluetooth state.' "$output"
   return 1
 }
 
@@ -106,7 +106,7 @@ set_device_property() {
     return 0
   fi
 
-  failed_action "Operazione non riuscita per ${aliases[$address]}." "$output"
+  failed_action "Operation failed for ${aliases[$address]}." "$output"
   return 1
 }
 
@@ -114,18 +114,18 @@ pair_selected_device() {
   local address=$1
   local output
 
-  notify normal "Associazione con ${aliases[$address]} in corso…"
+  notify normal "Pairing with ${aliases[$address]}…"
   # DisplayYesNo supports both Just Works and confirmation-based pairing. The
   # user has already selected the device explicitly, so confirm its passkey.
   output=$(printf 'yes\n' |
     LC_ALL=C bluetoothctl --agent DisplayYesNo --timeout 30 pair "$address" 2>&1)
   sleep 1
   if [[ $(device_property "$address" Paired) == yes ]]; then
-    notify normal "${aliases[$address]} associato."
+    notify normal "${aliases[$address]} paired."
     return 0
   fi
 
-  failed_action "Impossibile associare ${aliases[$address]}." "$output"
+  failed_action "Unable to pair ${aliases[$address]}." "$output"
   return 1
 }
 
@@ -133,19 +133,19 @@ remove_selected_device() {
   local address=$1
   local answer output
 
-  answer=$(printf 'No\nSì\n' |
-    wofi --dmenu --prompt "Rimuovere ${aliases[$address]}?" \
+  answer=$(printf 'No\nYes\n' |
+    wofi --dmenu --prompt "Remove ${aliases[$address]}?" \
       --width "$menu_width" --height "$input_height") || return 0
-  [[ $answer == Sì ]] || return 0
+  [[ $answer == Yes ]] || return 0
 
   output=$(bt remove "$address" 2>&1)
   sleep 1
   if [[ $(device_property "$address" Paired) != yes ]]; then
-    notify normal "${aliases[$address]} rimosso."
+    notify normal "${aliases[$address]} removed."
     return 0
   fi
 
-  failed_action "Impossibile rimuovere ${aliases[$address]}." "$output"
+  failed_action "Unable to remove ${aliases[$address]}." "$output"
   return 1
 }
 
@@ -207,20 +207,20 @@ device_menu() {
     case $choice in
       "$connect_device")
         set_device_property "$address" connect Connected yes \
-          "${aliases[$address]} connesso."
+          "${aliases[$address]} connected."
         ;;
       "$disconnect_device")
         set_device_property "$address" disconnect Connected no \
-          "${aliases[$address]} disconnesso."
+          "${aliases[$address]} disconnected."
         ;;
       "$pair_device") pair_selected_device "$address" ;;
       "$trust_device")
         set_device_property "$address" trust Trusted yes \
-          "${aliases[$address]} è ora attendibile."
+          "${aliases[$address]} is now trusted."
         ;;
       "$untrust_device")
         set_device_property "$address" untrust Trusted no \
-          "Attendibilità rimossa da ${aliases[$address]}."
+          "${aliases[$address]} is no longer trusted."
         ;;
       "$remove_device") remove_selected_device "$address"; return 0 ;;
       "$back") return 0 ;;
@@ -231,13 +231,13 @@ device_menu() {
 
 for command in bluetoothctl wofi; do
   command -v "$command" >/dev/null 2>&1 || {
-    notify critical "$command non è installato."
+    notify critical "$command is not installed."
     exit 1
   }
 done
 
 bt list 2>/dev/null | grep -q '^Controller ' || {
-  notify critical 'Nessun adattatore Bluetooth rilevato.'
+  notify critical 'No Bluetooth adapter detected.'
   exit 1
 }
 
@@ -278,7 +278,7 @@ while true; do
     "$enable_bluetooth") set_power on yes || true ;;
     "$disable_bluetooth") set_power off no; exit $? ;;
     "$scan_devices")
-      notify normal 'Ricerca dei dispositivi per 8 secondi…'
+      notify normal 'Scanning for devices for 8 seconds…'
       bt --timeout 8 scan on >/dev/null 2>&1 || true
       ;;
     *)

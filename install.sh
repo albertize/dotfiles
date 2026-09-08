@@ -7,6 +7,8 @@ set -u
 repo_dir=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P) || exit 1
 config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
 data_home=${XDG_DATA_HOME:-"$HOME/.local/share"}
+papirus_version=20260801
+papirus_archive="$repo_dir/themes/archives/papirus-dark-violet-${papirus_version}.tar.xz"
 
 links=(
   ".tmux.conf|$HOME/.tmux.conf"
@@ -60,7 +62,51 @@ link_file() {
   printf 'Created: %s -> %s\n' "$destination" "$source"
 }
 
+install_papirus_icons() {
+  local icons_home="$data_home/icons"
+  local marker="$icons_home/.dotfiles-papirus-dark-violet.version"
+  local answer tmp_dir
+
+  if [[ -r $marker ]] && [[ $(<"$marker") == "$papirus_version" ]] &&
+     [[ -d $icons_home/Papirus ]] && [[ -d $icons_home/Papirus-Dark ]]; then
+    printf 'Papirus-Dark violet %s is already installed.\n' "$papirus_version"
+    return 0
+  fi
+
+  if [[ -e $icons_home/Papirus || -L $icons_home/Papirus ||
+        -e $icons_home/Papirus-Dark || -L $icons_home/Papirus-Dark ]]; then
+    printf 'A Papirus icon theme already exists in "%s". Replace it? [y/N] ' "$icons_home"
+    read -r answer
+    case $answer in
+      y|Y) ;;
+      *) printf 'Skipped: Papirus icon theme\n'; return 0 ;;
+    esac
+  fi
+
+  [[ -r $papirus_archive ]] || {
+    printf 'Papirus archive not found: %s\n' "$papirus_archive" >&2
+    return 1
+  }
+
+  mkdir -p -- "$icons_home" || return 1
+  tmp_dir=$(mktemp -d "$icons_home/.papirus.XXXXXX") || return 1
+  if ! tar -xJf "$papirus_archive" -C "$tmp_dir"; then
+    rm -rf -- "$tmp_dir"
+    return 1
+  fi
+
+  rm -rf -- "$icons_home/Papirus" "$icons_home/Papirus-Dark"
+  mv -- "$tmp_dir/Papirus" "$tmp_dir/Papirus-Dark" "$icons_home/" || {
+    rm -rf -- "$tmp_dir"
+    return 1
+  }
+  rmdir -- "$tmp_dir"
+  printf '%s\n' "$papirus_version" > "$marker"
+  printf 'Installed Papirus-Dark violet %s in %s.\n' "$papirus_version" "$icons_home"
+}
+
 status=0
+install_papirus_icons || status=1
 for entry in "${links[@]}"; do
   link_file "${entry%%|*}" "${entry#*|}" || status=1
 done

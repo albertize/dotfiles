@@ -8,7 +8,7 @@ readonly minor_thousandths=382
 readonly golden_ratio_milli=1618
 
 command -v jq >/dev/null 2>&1 || {
-  printf 'golden-layout: jq non è installato\n' >&2
+  printf 'golden-layout: jq is not installed\n' >&2
   exit 1
 }
 

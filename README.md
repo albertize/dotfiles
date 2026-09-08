@@ -63,7 +63,9 @@ while preserving all other KDE settings.
 - Automatic locking is disabled; idle displays turn off after ten minutes.
 - The vendored `media/leaves_line_neon_139772_2560x1600.jpg` image is applied
   to every output with `fill` scaling.
-- New windows use an automatic Fibonacci layout with 61.8%/38.2% proportions.
+- New windows use an automatic Fibonacci layout with equal nested splits:
+  two windows are side by side, then the right half is split vertically, and
+  subsequent splits continue alternating.
 - Audio and brightness keys show replaceable Dunst progress indicators.
 - `Print` opens Flameshot's region editor; `Shift+Print` copies all outputs.
 - `Mod+n` restores the last notification, `Mod+Shift+n` clears notifications,

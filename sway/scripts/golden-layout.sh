@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 
-# Sway autotiling: each new window occupies 38.2% of the current container
-# and prepares the next split along its longest side.
+# Sway autotiling: split each selected container into equal halves. Splits
+# alternate horizontally and vertically, starting horizontally.
 set -uo pipefail
-
-readonly minor_thousandths=382
-readonly golden_ratio_milli=1618
 
 command -v jq >/dev/null 2>&1 || {
   printf 'golden-layout: jq is not installed\n' >&2
@@ -16,24 +13,24 @@ container_info() {
   local id=$1
 
   swaymsg -r -t get_tree | jq -r --argjson id "$id" '
-    def locate($wanted):
+    def locate($wanted; $workspace):
       . as $parent
       | ((.nodes // []) + (.floating_nodes // []))[] as $child
+      | ($child | if .type == "workspace" then . else $workspace end) as $child_workspace
       | if $child.id == $wanted then
-          {parent: $parent, node: $child}
+          {parent: $parent, node: $child, workspace: $child_workspace}
         else
-          ($child | locate($wanted))
+          ($child | locate($wanted; $child_workspace))
         end;
 
-    locate($id)
+    locate($id; null)
     | [
         .parent.layout,
         (.parent.nodes | length),
         .node.floating,
-        .node.rect.width,
-        .node.rect.height,
         .parent.rect.width,
-        .parent.rect.height
+        .parent.rect.height,
+        (.workspace | [recurse(.nodes[]?) | select(.pid? != null)] | length)
       ]
     | @tsv
   ' | head -n 1
@@ -41,41 +38,41 @@ container_info() {
 
 orient_container() {
   local id=$1
-  local info layout siblings floating width height parent_width parent_height
+  local info layout siblings floating parent_width parent_height tiled_count
 
   info=$(container_info "$id")
   [[ -n $info ]] || return 0
-  IFS=$'\t' read -r layout siblings floating width height parent_width parent_height <<< "$info"
+  IFS=$'\t' read -r layout siblings floating parent_width parent_height tiled_count <<< "$info"
 
   # Floating windows do not participate in automatic layout.
   [[ $floating == auto_off || $floating == user_off ]] || return 0
-  [[ $width =~ ^[0-9]+$ && $height =~ ^[0-9]+$ ]] || return 0
+  [[ $tiled_count =~ ^[0-9]+$ ]] || return 0
 
-  if (( width * 1000 >= height * golden_ratio_milli )); then
+  if (( tiled_count % 2 == 1 )); then
     swaymsg -q "[con_id=$id] split h"
   else
     swaymsg -q "[con_id=$id] split v"
   fi
 }
 
-resize_new_container() {
+balance_new_container() {
   local id=$1
-  local info layout siblings floating width height parent_width parent_height target
+  local info layout siblings floating parent_width parent_height tiled_count target
 
   info=$(container_info "$id")
   [[ -n $info ]] || return 0
-  IFS=$'\t' read -r layout siblings floating width height parent_width parent_height <<< "$info"
+  IFS=$'\t' read -r layout siblings floating parent_width parent_height tiled_count <<< "$info"
 
   [[ $floating == auto_off || $floating == user_off ]] || return 0
-  (( siblings > 1 )) || return 0
+  (( siblings == 2 )) || return 0
 
   case $layout in
     splith)
-      target=$(( parent_width * minor_thousandths / 1000 ))
+      target=$(( parent_width / 2 ))
       swaymsg -q "[con_id=$id] resize set width ${target}px"
       ;;
     splitv)
-      target=$(( parent_height * minor_thousandths / 1000 ))
+      target=$(( parent_height / 2 ))
       swaymsg -q "[con_id=$id] resize set height ${target}px"
       ;;
   esac
@@ -101,7 +98,7 @@ while IFS= read -r -u "${SWAY_EVENTS[0]}" event; do
 
   case $change in
     new)
-      resize_new_container "$id"
+      balance_new_container "$id"
       orient_container "$id"
       ;;
     focus)

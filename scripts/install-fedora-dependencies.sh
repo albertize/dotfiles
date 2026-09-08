@@ -24,7 +24,6 @@ packages=(
   git-core
   gnome-keyring
   gnome-keyring-pam
-  google-noto-sans-fonts
   gsettings-desktop-schemas
   jq
   kvantum

@@ -3,6 +3,8 @@ set $mod Mod4
 set $theme_env env XDG_CURRENT_DESKTOP=sway XDG_SESSION_DESKTOP=sway GTK_THEME=catppuccin-macchiato-blue-standard+default QT_STYLE_OVERRIDE=kvantum QT_QPA_PLATFORMTHEME=gtk3 QT_QPA_PLATFORM=wayland
 set $term $theme_env alacritty
 set $menu $theme_env wofi --show drun --allow-images
+# Work around Flameshot geometry errors on fractionally scaled Wayland outputs.
+set $screenshot $theme_env env QT_AUTO_SCREEN_SCALE_FACTOR=1 flameshot
 
 # Window gaps and borders, in logical pixels.
 set $gaps 3
@@ -78,8 +80,8 @@ bindsym $mod+d exec $menu
 # Mod+l is already used to move focus to the right.
 bindsym $mod+Ctrl+l exec swaylock
 bindsym $mod+q kill
-bindsym Print exec $theme_env flameshot gui
-bindsym Shift+Print exec $theme_env flameshot full --clipboard
+bindsym Print exec $screenshot gui
+bindsym Shift+Print exec $screenshot full --clipboard
 bindsym $mod+n exec dunstctl history-pop
 bindsym $mod+Shift+n exec dunstctl close-all
 bindsym $mod+Ctrl+n exec dunstctl set-paused toggle

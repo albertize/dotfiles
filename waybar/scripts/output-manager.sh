@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Keep one Waybar instance on the preferred external output and move it to the
-# laptop display whenever the external monitor is unavailable.
+# Keep one Waybar instance on the preferred external output and maintain valid
+# output coordinates when the external monitor is connected or disconnected.
 set -u
 
 readonly external_output='HDMI-A-1'
@@ -50,6 +50,31 @@ for command in jq swaymsg waybar; do
   }
 done
 
+arrange_outputs() {
+  local outputs external_active desired_x desired_y current_position
+
+  outputs=$(swaymsg -r -t get_outputs)
+  external_active=$(jq -r --arg output "$external_output" \
+    'any(.[]; .active and .name == $output)' <<< "$outputs")
+
+  if [[ $external_active == true ]]; then
+    desired_x=192
+    desired_y=1080
+  else
+    # Keep an active output at the global origin. Flameshot cannot determine
+    # capture geometry reliably when a lone output retains an old offset.
+    desired_x=0
+    desired_y=0
+  fi
+
+  current_position=$(jq -r --arg output "$internal_output" '
+    [.[] | select(.active and .name == $output) | .rect.x, .rect.y] | @tsv
+  ' <<< "$outputs")
+  [[ -n $current_position ]] || return 0
+  [[ $current_position == "$desired_x"$'\t'"$desired_y" ]] ||
+    swaymsg -q output "$internal_output" position "$desired_x" "$desired_y"
+}
+
 select_output() {
   swaymsg -r -t get_outputs | jq -r \
     --arg external "$external_output" --arg internal "$internal_output" '
@@ -96,6 +121,7 @@ if [[ ${WAYBAR_MANAGER_SKIP_LEGACY_CLEANUP:-0} != 1 ]]; then
   pkill -x waybar 2>/dev/null || true
 fi
 current_output=''
+arrange_outputs
 refresh_bar
 
 coproc OUTPUT_EVENTS { exec swaymsg -m -r -t subscribe '["output"]'; }
@@ -104,5 +130,6 @@ events_fd=${OUTPUT_EVENTS[0]}
 
 while IFS= read -r -u "$events_fd" event; do
   sleep 0.2
+  arrange_outputs
   refresh_bar
 done

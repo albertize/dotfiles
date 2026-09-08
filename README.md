@@ -19,7 +19,9 @@ with violet folders. Window borders and gaps are set to three logical pixels thr
 `$border` and `$gaps` in `sway/config`. The built-in `eDP-1` display uses 125%
 scaling and is centered below the `HDMI-A-1` external display. Waybar prefers
 the upper external display and automatically moves to the laptop panel when the
-external display is disconnected. Use `swaymsg -t get_outputs` to find the
+external display is disconnected. In laptop-only mode, the panel is moved back
+to the global origin so screenshot tools receive valid capture geometry. Use
+`swaymsg -t get_outputs` to find the
 correct output names on a different machine.
 
 ## Sway requirements
@@ -35,7 +37,7 @@ correct output names on a different machine.
 - JetBrainsMono Nerd Font for text and icons
 - `pavucontrol` optionally, for the volume module's right-click action
 - Kvantum and GTK 3 platform-theme plugins for Qt 5 and Qt 6
-- Noto Sans, the Adwaita cursor theme, and `xsettingsd`
+- The Adwaita cursor theme and `xsettingsd`
 
 The official Catppuccin GTK and Kvantum themes and the Papirus-Dark icon theme
 are vendored in this repository. The installer links the toolkit themes and
@@ -45,20 +47,24 @@ from the next login. A managed systemd user target registers Sway as a graphical
 session so portal-based screenshots work even when Sway is started manually.
 See [`themes/README.md`](themes/README.md) for versions, upstream sources, and
 licenses.
-The dark theme, Papirus-Dark icons, Adwaita cursor, font, DPI, and antialiasing
-values are published through GSettings and XSettings so applications do not
-need application-specific overrides. The theme application script also updates
-the `Icons/Theme` key in `kdeglobals` for KDE applications such as Dolphin,
-while preserving all other KDE settings.
+The dark theme, Papirus-Dark icons, Adwaita cursor, JetBrainsMono Nerd Font,
+DPI, and antialiasing values are published through GSettings and XSettings so
+applications do not need application-specific overrides. The theme application
+script also updates the icon and font keys in `kdeglobals` for KDE applications
+such as Dolphin, while preserving all other KDE settings.
 
 ## Desktop behavior
 
 - LightDM GTK provides the login screen with the same wallpaper, Catppuccin
-  theme, Adwaita icons, Noto Sans font, and Sway as the default session.
+  theme, Adwaita icons, JetBrainsMono Nerd Font, and Sway as the default
+  session.
 - LightDM unlocks the login keyring through PAM; GNOME Keyring exposes the
   standard Secret Service API and the secret portal to native and sandboxed
   applications.
-- `Mod+d` opens Wofi with application icons.
+- `Mod+d` opens Wofi with application icons. The minimal application-grid icon
+  at the left of Waybar provides the same launcher.
+- Waybar renders the focused workspace as a solid square and uses compact,
+  dimmed numbers for the other workspaces that currently exist.
 - `Mod+Ctrl+l` locks the session manually.
 - Automatic locking is disabled; idle displays turn off after ten minutes.
 - The vendored `media/leaves_line_neon_139772_2560x1600.jpg` image is applied
@@ -68,6 +74,8 @@ while preserving all other KDE settings.
   subsequent splits continue alternating.
 - Audio and brightness keys show replaceable Dunst progress indicators.
 - `Print` opens Flameshot's region editor; `Shift+Print` copies all outputs.
+  Flameshot uses automatic Qt scaling without its magnifier to avoid zoomed
+  capture geometry on fractionally scaled Wayland outputs.
 - `Mod+n` restores the last notification, `Mod+Shift+n` clears notifications,
   and `Mod+Ctrl+n` pauses or resumes Dunst.
 - Waybar's clipboard button opens history with Wofi; right-click deletes one

@@ -41,9 +41,27 @@ window#waybar {
   background: transparent;
 }
 
+#custom-launcher {
+  min-width: 18px;
+  padding: 0 5px;
+  color: @blue;
+  background: transparent;
+  font-size: 16px;
+}
+
+#custom-launcher:hover {
+  color: @text;
+  background: @surface0;
+}
+
+#workspaces {
+  margin-right: 5px;
+}
+
 #workspaces button {
-  padding: 0 6px;
-  color: @subtext0;
+  min-width: 12px;
+  padding: 0 4px;
+  color: @overlay0;
   background: transparent;
 }
 
@@ -55,13 +73,14 @@ window#waybar {
 
 #workspaces button.focused,
 #workspaces button.active {
-  color: @crust;
-  background: @blue;
+  color: @text;
+  background: transparent;
+  font-size: 13px;
 }
 
 #workspaces button.urgent {
-  color: @crust;
-  background: @red;
+  color: @red;
+  background: transparent;
 }
 
 #mode {
@@ -111,11 +130,12 @@ window#waybar {
 }
 
 #custom-power {
-  color: @crust;
-  background: @red;
+  padding-right: 10px;
+  color: @red;
+  background: transparent;
 }
 
-#custom-power:hover { background: @maroon; }
+#custom-power:hover { background: @surface0; }
 
 tooltip {
   color: @text;

@@ -1,8 +1,8 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 22,
-  "spacing": 0,
+  "height": 24,
+  "spacing": 3,
   "margin-top": 0,
   "margin-bottom": 0,
   "margin-left": 0,
@@ -15,7 +15,7 @@
   "custom/launcher": {
     "format": "",
     "tooltip": true,
-    "tooltip-format": "Applications",
+    "tooltip-format": "<span color='#8aadf4'><b>Applications</b></span>\nClick to open the launcher",
     "on-click": "wofi --show drun --allow-images"
   },
   "sway/workspaces": {
@@ -43,9 +43,28 @@
   },
   "clock": {
     "interval": 1,
-    "format": "󰥔  {:%H:%M}",
+    "locale": "en_US.UTF-8",
+    "format": "󰥔  {:%A %H:%M}",
     "format-alt": "󰃭  {:%A %d %B %Y}",
-    "tooltip-format": "<tt><small>{calendar}</small></tt>"
+    "tooltip-format": "<span color='#8aadf4'><b>{:%A %d %B %Y · %H:%M:%S}</b></span>\n\n<tt><span size='large'>{calendar}</span></tt>",
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 3,
+      "weeks-pos": "left",
+      "on-scroll": 1,
+      "iso8601": true,
+      "format": {
+        "months": "<span color='#8aadf4'><b>{}</b></span>",
+        "days": "<span color='#cad3f5'>{}</span>",
+        "weekdays": "<span color='#c6a0f6'><b>{}</b></span>",
+        "weeks": "<span color='#6e738d'>{}</span>",
+        "today": "<span color='#24273a' background='#8aadf4'><b>{}</b></span>"
+      }
+    },
+    "actions": {
+      "on-scroll-up": "shift_down",
+      "on-scroll-down": "shift_up"
+    }
   },
   "idle_inhibitor": {
     "format": "{icon}",
@@ -53,78 +72,115 @@
       "activated": "󰅶",
       "deactivated": "󰾪"
     },
-    "tooltip-format-activated": "Automatic idle actions disabled",
-    "tooltip-format-deactivated": "Automatic idle actions enabled"
+    "tooltip-format-activated": "<span color='#eed49f'><b>Idle inhibitor</b></span>\nAutomatic idle actions disabled",
+    "tooltip-format-deactivated": "<span color='#a6da95'><b>Idle inhibitor</b></span>\nAutomatic idle actions enabled"
   },
   "bluetooth": {
     "format": "",
     "format-disabled": "󰂲",
     "format-off": "󰂲",
     "format-on": "",
-    "format-connected": "󰂱  {num_connections}",
+    "format-connected": "󰂱",
     "format-no-controller": "",
-    "tooltip-format": "{controller_alias}\nBluetooth: {status}\nClick: manage devices",
-    "tooltip-format-connected": "{controller_alias}\nConnected devices: {num_connections}\n{device_enumerate}\nClick: manage devices",
+    "tooltip-format": "<span color='#8aadf4'><b>Bluetooth</b></span> · {status}\n{controller_alias}\nClick to manage devices",
+    "tooltip-format-connected": "<span color='#8bd5ca'><b>Bluetooth</b></span> · {status}\nConnected devices: {num_connections}\n{device_enumerate}\nClick to manage devices",
     "tooltip-format-enumerate-connected": "  {device_alias}",
     "on-click": "~/.config/waybar/scripts/bluetooth-menu.sh"
   },
   "pulseaudio": {
     "scroll-step": 5,
-    "format": "{icon}  {volume}%",
-    "format-muted": "󰖁  muted",
+    "format": "",
+    "format-muted": "󰖁",
     "format-icons": {
-      "headphone": "󰋋",
-      "hands-free": "󰋎",
-      "headset": "󰋎",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": ["", "", ""]
+      "default": [
+        "<span color='#494d64'>░░░░░░░░░░</span>",
+        "<span color='#8bd5ca'>█</span><span color='#494d64'>░░░░░░░░░</span>",
+        "<span color='#8bd5ca'>██</span><span color='#494d64'>░░░░░░░░</span>",
+        "<span color='#8bd5ca'>███</span><span color='#494d64'>░░░░░░░</span>",
+        "<span color='#8bd5ca'>████</span><span color='#494d64'>░░░░░░</span>",
+        "<span color='#8bd5ca'>█████</span><span color='#494d64'>░░░░░</span>",
+        "<span color='#8bd5ca'>██████</span><span color='#494d64'>░░░░</span>",
+        "<span color='#8bd5ca'>███████</span><span color='#494d64'>░░░</span>",
+        "<span color='#8bd5ca'>████████</span><span color='#494d64'>░░</span>",
+        "<span color='#8bd5ca'>█████████</span><span color='#494d64'>░</span>",
+        "<span color='#8bd5ca'>██████████</span>"
+      ]
     },
+    "tooltip-format": "<span color='#8bd5ca'><b>Audio</b></span> · {volume}%\n{icon}\n{desc}\nScroll: adjust volume\nClick: mute · Right click: mixer",
     "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
     "on-click-right": "pavucontrol"
   },
   "network": {
-    "format-wifi": "  {signalStrength}%",
-    "format-ethernet": "󰈀  connected",
-    "format-linked": "󰈀  no IP",
-    "format-disconnected": "󰤭  offline",
-    "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ipaddr}\nClick: manage networks",
-    "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}\nClick: manage networks",
-    "tooltip-format-disconnected": "Network disconnected\nClick: select a network",
+    "format-wifi": "",
+    "format-ethernet": "󰈀",
+    "format-linked": "󰈀",
+    "format-disconnected": "󰤭",
+    "format-icons": [
+      "<span color='#494d64'>░░░░░░░░░░</span>",
+      "<span color='#7dc4e4'>█</span><span color='#494d64'>░░░░░░░░░</span>",
+      "<span color='#7dc4e4'>██</span><span color='#494d64'>░░░░░░░░</span>",
+      "<span color='#7dc4e4'>███</span><span color='#494d64'>░░░░░░░</span>",
+      "<span color='#7dc4e4'>████</span><span color='#494d64'>░░░░░░</span>",
+      "<span color='#7dc4e4'>█████</span><span color='#494d64'>░░░░░</span>",
+      "<span color='#7dc4e4'>██████</span><span color='#494d64'>░░░░</span>",
+      "<span color='#7dc4e4'>███████</span><span color='#494d64'>░░░</span>",
+      "<span color='#7dc4e4'>████████</span><span color='#494d64'>░░</span>",
+      "<span color='#7dc4e4'>█████████</span><span color='#494d64'>░</span>",
+      "<span color='#7dc4e4'>██████████</span>"
+    ],
+    "tooltip-format-wifi": "<span color='#7dc4e4'><b>Wi-Fi</b></span> · {signalStrength}%\n{icon}\n{essid}\n{ipaddr}/{cidr}\nGateway: {gwaddr}\nClick to manage networks",
+    "tooltip-format-ethernet": "<span color='#7dc4e4'><b>Ethernet</b></span>\n{ifname}: {ipaddr}/{cidr}\nGateway: {gwaddr}\nClick to manage networks",
+    "tooltip-format-disconnected": "<span color='#ed8796'><b>Network disconnected</b></span>\nClick to select a network",
     "on-click": "~/.config/waybar/scripts/network-menu.sh"
   },
   "cpu": {
     "interval": 5,
-    "format": "  {usage}%",
-    "tooltip": false
+    "format": "",
+    "format-icons": [
+      "<span color='#494d64'>░░░░░░░░░░</span>",
+      "<span color='#c6a0f6'>█</span><span color='#494d64'>░░░░░░░░░</span>",
+      "<span color='#c6a0f6'>██</span><span color='#494d64'>░░░░░░░░</span>",
+      "<span color='#c6a0f6'>███</span><span color='#494d64'>░░░░░░░</span>",
+      "<span color='#c6a0f6'>████</span><span color='#494d64'>░░░░░░</span>",
+      "<span color='#c6a0f6'>█████</span><span color='#494d64'>░░░░░</span>",
+      "<span color='#c6a0f6'>██████</span><span color='#494d64'>░░░░</span>",
+      "<span color='#c6a0f6'>███████</span><span color='#494d64'>░░░</span>",
+      "<span color='#c6a0f6'>████████</span><span color='#494d64'>░░</span>",
+      "<span color='#c6a0f6'>█████████</span><span color='#494d64'>░</span>",
+      "<span color='#c6a0f6'>██████████</span>"
+    ],
+    "tooltip-format": "<span color='#c6a0f6'><b>CPU</b></span> · {usage}%\n{icon}\nLoad: {load}\nAverage frequency: {avg_frequency} GHz"
   },
   "memory": {
     "interval": 5,
-    "format": "  {percentage}%",
-    "tooltip-format": "{used:0.1f} GiB used"
+    "format": "",
+    "tooltip-format": "Memory: {percentage}%\nUsed: {used:0.1f}/{total:0.1f} GiB\nAvailable: {avail:0.1f} GiB"
   },
   "battery": {
+    "bat": "BAT1",
+    "adapter": "ACAD",
     "states": {
       "warning": 30,
       "critical": 15
     },
-    "format": "{icon}  {capacity}%",
-    "format-charging": "󰂄  {capacity}%",
-    "format-plugged": "󰚥  {capacity}%",
+    "format": "{icon}",
+    "format-charging": "󰂄",
+    "format-plugged": "󰚥",
+    "format-full": "󰚥",
+    "format-not-charging": "󰚥",
     "format-alt": "{time}  {icon}",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
-    "tooltip-format": "Battery: {capacity}%\nRight click: select a power profile",
+    "tooltip-format": "<span color='#a6da95'><b>Battery</b></span> · {capacity}%\nEstimate: {time}\nPower: {power} W\nHealth: {health}%\nRight click: select a power profile",
     "on-click-right": "~/.config/waybar/scripts/power-profile-menu.sh"
   },
   "tray": {
     "icon-size": 18,
-    "spacing": 5
+    "spacing": 8
   },
   "custom/clipboard": {
     "format": "󰅍",
     "tooltip": true,
-    "tooltip-format": "Click: clipboard history\nRight click: delete an entry\nMiddle click: clear history",
+    "tooltip-format": "<span color='#8aadf4'><b>Clipboard history</b></span>\nClick: open\nRight click: delete an entry\nMiddle click: clear history",
     "on-click": "~/.config/waybar/scripts/clipboard-menu.sh",
     "on-click-right": "~/.config/waybar/scripts/clipboard-menu.sh delete",
     "on-click-middle": "~/.config/waybar/scripts/clipboard-menu.sh wipe"
@@ -132,7 +188,7 @@
   "custom/power": {
     "format": "",
     "tooltip": true,
-    "tooltip-format": "Lock, log out, or power off",
+    "tooltip-format": "<span color='#ed8796'><b>Session</b></span>\nClick to lock, log out, or power off",
     "on-click": "~/.config/waybar/scripts/power-menu.sh"
   }
 }

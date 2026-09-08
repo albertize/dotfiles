@@ -128,7 +128,22 @@ set $ws6 "6"
 set $ws7 "7"
 set $ws8 "8"
 set $ws9 "9"
-set $ws10 "10"
+# The laptop workspace has no numeric label, but remains available on Mod+0.
+set $ws10 ""
+
+# Prefer numbered workspaces on the external display and the dedicated laptop
+# workspace on the internal panel. The second output is a fallback when the
+# preferred output is disconnected.
+workspace $ws1 output HDMI-A-1 eDP-1
+workspace $ws2 output HDMI-A-1 eDP-1
+workspace $ws3 output HDMI-A-1 eDP-1
+workspace $ws4 output HDMI-A-1 eDP-1
+workspace $ws5 output HDMI-A-1 eDP-1
+workspace $ws6 output HDMI-A-1 eDP-1
+workspace $ws7 output HDMI-A-1 eDP-1
+workspace $ws8 output HDMI-A-1 eDP-1
+workspace $ws9 output HDMI-A-1 eDP-1
+workspace $ws10 output eDP-1 HDMI-A-1
 
 bindsym $mod+1 workspace number $ws1
 bindsym $mod+2 workspace number $ws2
@@ -139,7 +154,7 @@ bindsym $mod+6 workspace number $ws6
 bindsym $mod+7 workspace number $ws7
 bindsym $mod+8 workspace number $ws8
 bindsym $mod+9 workspace number $ws9
-bindsym $mod+0 workspace number $ws10
+bindsym $mod+0 workspace $ws10
 
 bindsym $mod+Shift+1 move container to workspace number $ws1
 bindsym $mod+Shift+2 move container to workspace number $ws2
@@ -150,7 +165,7 @@ bindsym $mod+Shift+6 move container to workspace number $ws6
 bindsym $mod+Shift+7 move container to workspace number $ws7
 bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
-bindsym $mod+Shift+0 move container to workspace number $ws10
+bindsym $mod+Shift+0 move container to workspace $ws10
 
 ### Layout
 # The layout is selected automatically; these bindings remain available only

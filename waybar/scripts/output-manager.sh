@@ -6,6 +6,7 @@ set -u
 
 readonly external_output='HDMI-A-1'
 readonly internal_output='eDP-1'
+readonly laptop_workspace=''
 readonly config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
 readonly runtime_dir=${XDG_RUNTIME_DIR:-"/tmp/waybar-$UID"}
 readonly source_config="$config_home/waybar/config"
@@ -75,6 +76,54 @@ arrange_outputs() {
     swaymsg -q output "$internal_output" position "$desired_x" "$desired_y"
 }
 
+arrange_workspaces() {
+  local outputs workspaces external_active internal_active laptop_output
+  local internal_visible focused_workspace restore_workspace workspace_number
+
+  outputs=$(swaymsg -r -t get_outputs)
+  external_active=$(jq -r --arg output "$external_output" \
+    'any(.[]; .active and .name == $output)' <<< "$outputs")
+  internal_active=$(jq -r --arg output "$internal_output" \
+    'any(.[]; .active and .name == $output)' <<< "$outputs")
+  [[ $external_active == true && $internal_active == true ]] || return 0
+
+  workspaces=$(swaymsg -r -t get_workspaces)
+  focused_workspace=$(jq -r '[.[] | select(.focused)][0].name // empty' \
+    <<< "$workspaces")
+  restore_workspace=$focused_workspace
+  laptop_output=$(jq -r --arg workspace "$laptop_workspace" \
+    '[.[] | select(.name == $workspace)][0].output // empty' <<< "$workspaces")
+
+  if [[ -z $laptop_output ]]; then
+    # Reuse the workspace Sway placed on the panel instead of leaving behind
+    # an arbitrary dynamically numbered workspace.
+    internal_visible=$(jq -r --arg output "$internal_output" \
+      '[.[] | select(.output == $output and .visible)][0].name // empty' \
+      <<< "$workspaces")
+    [[ -n $internal_visible ]] || return 0
+    swaymsg -q rename workspace "$internal_visible" to "$laptop_workspace"
+    [[ $restore_workspace == "$internal_visible" ]] && \
+      restore_workspace=$laptop_workspace
+  elif [[ $laptop_output != "$internal_output" ]]; then
+    swaymsg -q workspace "$laptop_workspace"
+    swaymsg -q move workspace to output "$internal_output"
+  fi
+
+  # Existing numbered workspaces may have been created while only the laptop
+  # panel was active. Move them to the external output after hot-plugging it.
+  workspaces=$(swaymsg -r -t get_workspaces)
+  for workspace_number in {1..9}; do
+    if jq -e --arg workspace "$workspace_number" --arg output "$external_output" \
+      'any(.[]; .name == $workspace and .output != $output)' \
+      <<< "$workspaces" >/dev/null; then
+      swaymsg -q workspace number "$workspace_number"
+      swaymsg -q move workspace to output "$external_output"
+    fi
+  done
+
+  [[ -n $restore_workspace ]] && swaymsg -q workspace "$restore_workspace"
+}
+
 select_output() {
   swaymsg -r -t get_outputs | jq -r \
     --arg external "$external_output" --arg internal "$internal_output" '
@@ -122,6 +171,7 @@ if [[ ${WAYBAR_MANAGER_SKIP_LEGACY_CLEANUP:-0} != 1 ]]; then
 fi
 current_output=''
 arrange_outputs
+arrange_workspaces
 refresh_bar
 
 coproc OUTPUT_EVENTS { exec swaymsg -m -r -t subscribe '["output"]'; }
@@ -131,5 +181,6 @@ events_fd=${OUTPUT_EVENTS[0]}
 while IFS= read -r -u "$events_fd" event; do
   sleep 0.2
   arrange_outputs
+  arrange_workspaces
   refresh_bar
 done

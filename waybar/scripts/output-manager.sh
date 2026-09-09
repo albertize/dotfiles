@@ -4,7 +4,8 @@
 # output coordinates when the external monitor is connected or disconnected.
 set -u
 
-readonly external_output='HDMI-A-1'
+# Preferred external connectors, in priority order.
+readonly external_outputs=('HDMI-A-1' 'DP-3')
 readonly internal_output='eDP-1'
 readonly laptop_workspace=''
 readonly config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
@@ -51,14 +52,24 @@ for command in jq swaymsg waybar; do
   }
 done
 
+external_outputs_json=$(printf '%s\n' "${external_outputs[@]}" | jq -R . | jq -s .)
+readonly external_outputs_json
+
+# Print the first active external output, or nothing when none is connected.
+active_external_output() {
+  jq -r --argjson candidates "$external_outputs_json" '
+    [$candidates[] as $name | .[] | select(.active and .name == $name) | .name][0]
+      // empty
+  ' <<< "$1"
+}
+
 arrange_outputs() {
-  local outputs external_active desired_x desired_y current_position
+  local outputs external desired_x desired_y current_position
 
   outputs=$(swaymsg -r -t get_outputs)
-  external_active=$(jq -r --arg output "$external_output" \
-    'any(.[]; .active and .name == $output)' <<< "$outputs")
+  external=$(active_external_output "$outputs")
 
-  if [[ $external_active == true ]]; then
+  if [[ -n $external ]]; then
     desired_x=192
     desired_y=1080
   else
@@ -77,15 +88,14 @@ arrange_outputs() {
 }
 
 arrange_workspaces() {
-  local outputs workspaces external_active internal_active laptop_output
+  local outputs workspaces external internal_active laptop_output
   local internal_visible focused_workspace restore_workspace workspace_number
 
   outputs=$(swaymsg -r -t get_outputs)
-  external_active=$(jq -r --arg output "$external_output" \
-    'any(.[]; .active and .name == $output)' <<< "$outputs")
+  external=$(active_external_output "$outputs")
   internal_active=$(jq -r --arg output "$internal_output" \
     'any(.[]; .active and .name == $output)' <<< "$outputs")
-  [[ $external_active == true && $internal_active == true ]] || return 0
+  [[ -n $external && $internal_active == true ]] || return 0
 
   workspaces=$(swaymsg -r -t get_workspaces)
   focused_workspace=$(jq -r '[.[] | select(.focused)][0].name // empty' \
@@ -113,11 +123,11 @@ arrange_workspaces() {
   # panel was active. Move them to the external output after hot-plugging it.
   workspaces=$(swaymsg -r -t get_workspaces)
   for workspace_number in {1..9}; do
-    if jq -e --arg workspace "$workspace_number" --arg output "$external_output" \
+    if jq -e --arg workspace "$workspace_number" --arg output "$external" \
       'any(.[]; .name == $workspace and .output != $output)' \
       <<< "$workspaces" >/dev/null; then
       swaymsg -q workspace number "$workspace_number"
-      swaymsg -q move workspace to output "$external_output"
+      swaymsg -q move workspace to output "$external"
     fi
   done
 
@@ -125,12 +135,19 @@ arrange_workspaces() {
 }
 
 select_output() {
-  swaymsg -r -t get_outputs | jq -r \
-    --arg external "$external_output" --arg internal "$internal_output" '
-      ([.[] | select(.active and .name == $external) | .name][0]) //
-      ([.[] | select(.active and .name == $internal) | .name][0]) //
-      ([.[] | select(.active) | .name][0]) // empty
-    '
+  local outputs external
+
+  outputs=$(swaymsg -r -t get_outputs)
+  external=$(active_external_output "$outputs")
+  if [[ -n $external ]]; then
+    printf '%s\n' "$external"
+    return 0
+  fi
+
+  jq -r --arg internal "$internal_output" '
+    ([.[] | select(.active and .name == $internal) | .name][0]) //
+    ([.[] | select(.active) | .name][0]) // empty
+  ' <<< "$outputs"
 }
 
 stop_bar() {

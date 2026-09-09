@@ -17,7 +17,8 @@ Sway, Waybar, Wofi, Swaylock, GTK, and Qt use Catppuccin Macchiato with the
 Blue accent. Desktop applications use the vendored Papirus-Dark icon theme
 with violet folders. Window borders and gaps are set to three logical pixels through
 `$border` and `$gaps` in `sway/config`. The built-in `eDP-1` display uses 125%
-scaling and is centered below the `HDMI-A-1` external display. Waybar prefers
+scaling and is centered below the external display, which may be connected
+through either `HDMI-A-1` or `DP-3`. Waybar prefers
 the upper external display and automatically moves to the laptop panel when the
 external display is disconnected. In laptop-only mode, the panel is moved back
 to the global origin so screenshot tools receive valid capture geometry. Use

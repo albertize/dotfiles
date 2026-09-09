@@ -18,7 +18,12 @@ output * bg #24273a solid_color
 exec_always --no-startup-id sh -c 'data_home=${XDG_DATA_HOME:-"$HOME/.local/share"}; exec swaymsg output "*" bg "$data_home/backgrounds/dotfiles/leaves_line_neon_139772_2560x1600.jpg" fill'
 # Center the laptop display below the unscaled external monitor. The laptop's
 # 1920x1200 panel is 1536 logical pixels wide at 125% scaling.
+# Both external connectors used on this machine are configured identically.
 output HDMI-A-1 {
+    position 0 0
+    scale 1
+}
+output DP-3 {
     position 0 0
     scale 1
 }
@@ -134,16 +139,16 @@ set $ws10 ""
 # Prefer numbered workspaces on the external display and the dedicated laptop
 # workspace on the internal panel. The second output is a fallback when the
 # preferred output is disconnected.
-workspace $ws1 output HDMI-A-1 eDP-1
-workspace $ws2 output HDMI-A-1 eDP-1
-workspace $ws3 output HDMI-A-1 eDP-1
-workspace $ws4 output HDMI-A-1 eDP-1
-workspace $ws5 output HDMI-A-1 eDP-1
-workspace $ws6 output HDMI-A-1 eDP-1
-workspace $ws7 output HDMI-A-1 eDP-1
-workspace $ws8 output HDMI-A-1 eDP-1
-workspace $ws9 output HDMI-A-1 eDP-1
-workspace $ws10 output eDP-1 HDMI-A-1
+workspace $ws1 output HDMI-A-1 DP-3 eDP-1
+workspace $ws2 output HDMI-A-1 DP-3 eDP-1
+workspace $ws3 output HDMI-A-1 DP-3 eDP-1
+workspace $ws4 output HDMI-A-1 DP-3 eDP-1
+workspace $ws5 output HDMI-A-1 DP-3 eDP-1
+workspace $ws6 output HDMI-A-1 DP-3 eDP-1
+workspace $ws7 output HDMI-A-1 DP-3 eDP-1
+workspace $ws8 output HDMI-A-1 DP-3 eDP-1
+workspace $ws9 output HDMI-A-1 DP-3 eDP-1
+workspace $ws10 output eDP-1 HDMI-A-1 DP-3
 
 bindsym $mod+1 workspace number $ws1
 bindsym $mod+2 workspace number $ws2

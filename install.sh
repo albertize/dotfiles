@@ -11,6 +11,7 @@ papirus_version=20260801
 papirus_archive="$repo_dir/themes/archives/papirus-dark-violet-${papirus_version}.tar.xz"
 
 links=(
+  ".bash_profile|$HOME/.bash_profile"
   ".tmux.conf|$HOME/.tmux.conf"
   "alacritty|$config_home/alacritty"
   "nvim|$config_home/nvim"

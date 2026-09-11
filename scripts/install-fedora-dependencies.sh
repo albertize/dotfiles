@@ -29,8 +29,6 @@ packages=(
   kvantum
   libnotify
   libsecret
-  lightdm
-  lightdm-gtk
   NetworkManager
   neovim
   pavucontrol
@@ -52,7 +50,6 @@ packages=(
   xdg-desktop-portal-gtk
   xdg-desktop-portal-wlr
   xdg-utils
-  xorg-x11-server-Xorg
   xsettingsd
   xz
 )
@@ -171,4 +168,4 @@ if ! $font_installed; then
 fi
 
 printf 'Fedora dependencies installed successfully.\n'
-printf 'Run scripts/configure-lightdm.sh to install and enable the login manager.\n'
+printf 'Run install.sh and then scripts/configure-tty-login.sh to enable the tty1 login.\n'

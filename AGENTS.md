@@ -33,7 +33,7 @@ changes portable, reviewable, and safe to apply repeatedly.
 - `sway/`, `waybar/`, `wofi/`, `swaylock/`: Wayland desktop configuration.
 - `dunst/`, `flameshot/`, `xdg-desktop-portal/`: notifications, screenshots,
   and portal backend selection.
-- `lightdm/`: managed LightDM and GTK greeter configuration.
+- `systemd/system/`: managed system-level templates such as the tty1 getty override.
 - `systemd/user/`: user-session targets needed by desktop services.
 - `gtk-3.0/`, `gtk-4.0/`, `Kvantum/`, `xsettingsd/`: toolkit theming.
 - `themes/`: pinned upstream theme assets and provenance.
@@ -42,8 +42,9 @@ changes portable, reviewable, and safe to apply repeatedly.
 
 ## Installation rules
 
-- Add every new managed configuration path to the `links` array in
-  `install.sh`.
+- Add every new user-level managed configuration path to the `links` array in
+  `install.sh`. Install privileged system configuration through a documented
+  setup script.
 - Respect `XDG_CONFIG_HOME` and `XDG_DATA_HOME`; do not hardcode the user's home
   directory.
 - Preserve the installer's confirmation prompt for conflicting destinations.

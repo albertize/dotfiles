@@ -82,8 +82,8 @@ exec swayidle -w \
 ### Applications
 bindsym $mod+Return exec $term
 bindsym $mod+d exec $menu
-# Mod+l is already used to move focus to the right.
-bindsym $mod+Ctrl+l exec swaylock
+# Lock the session manually; use Mod+Right to move focus to the right.
+bindsym $mod+l exec swaylock
 bindsym $mod+q kill
 bindsym Print exec $screenshot gui
 bindsym Shift+Print exec $screenshot full --clipboard
@@ -108,7 +108,6 @@ set $right l
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
 bindsym $mod+$up focus up
-bindsym $mod+$right focus right
 bindsym $mod+Left focus left
 bindsym $mod+Down focus down
 bindsym $mod+Up focus up

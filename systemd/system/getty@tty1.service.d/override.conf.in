@@ -1,0 +1,4 @@
+[Service]
+# Show only the base Fedora issue and omit optional package advertisements.
+ExecStart=
+ExecStart=-/usr/sbin/agetty --noreset --skip-login --login-options "@USER@" --issue-file=/etc/issue - ${TERM}

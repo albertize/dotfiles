@@ -9,7 +9,7 @@ Personal configuration files for:
 - [Waybar](waybar)
 - [Wofi](wofi)
 - [Swaylock](swaylock)
-- [Dunst](dunst), [Flameshot](flameshot), and [LightDM](lightdm)
+- [Dunst](dunst), [Flameshot](flameshot), and a password-authenticated tty1 login
 - [GTK 3/4](gtk-3.0) and [Qt 5/6](Kvantum)
 - [Shell prompt](promptrc) — not installed automatically
 
@@ -34,7 +34,7 @@ correct output names on a different machine.
 - `gnome-keyring`, `gnome-keyring-pam`, and `libsecret` for secret storage
 - `flameshot`, `xdg-desktop-portal`, `xdg-desktop-portal-wlr`, and
   `xdg-desktop-portal-gtk`
-- `lightdm`, `lightdm-gtk`, and `xorg-x11-server-Xorg` for the login manager
+- util-linux (`agetty` and `login`) for the password-authenticated tty1 login
 - JetBrainsMono Nerd Font for text and icons
 - `pavucontrol` optionally, for the volume module's right-click action
 - Kvantum and GTK 3 platform-theme plugins for Qt 5 and Qt 6
@@ -56,17 +56,19 @@ such as Dolphin, while preserving all other KDE settings.
 
 ## Desktop behavior
 
-- LightDM GTK provides the login screen with the same wallpaper, Catppuccin
-  theme, Adwaita icons, system-wide JetBrainsMono Nerd Font, native 96 DPI, and
-  Sway as the default session.
-- LightDM unlocks the login keyring through PAM; GNOME Keyring exposes the
-  standard Secret Service API and the secret portal to native and sandboxed
-  applications.
+- Getty on tty1 uses a fixed account name, requests its password through the
+  standard `login` PAM service, and starts Sway from the login shell. It clears
+  boot messages before displaying the prompt. A failed password attempt
+  restarts the same fixed-user prompt instead of requesting a username. Other
+  virtual terminals remain available for maintenance.
+- The console PAM stack does not unlock GNOME Keyring automatically. GNOME
+  Keyring still exposes the standard Secret Service API and may request its
+  password when an application first accesses the login keyring.
 - `Mod+d` opens Wofi with application icons. The minimal application-grid icon
   at the left of Waybar provides the same launcher.
 - Waybar renders the focused workspace as a solid square and uses compact,
   dimmed numbers for the other workspaces that currently exist.
-- `Mod+Ctrl+l` locks the session manually.
+- `Mod+l` locks the session manually; `Mod+Right` moves focus to the right.
 - Automatic locking is disabled; idle displays turn off after ten minutes.
 - The vendored `media/leaves_line_neon_139772_2560x1600.jpg` image is applied
   to every output with `fill` scaling.
@@ -102,19 +104,6 @@ invoking `sudo dnf`:
 ```
 
 Use `./scripts/install-fedora-dependencies.sh --check` for a read-only check.
-Install the managed LightDM configuration and enable it for the next boot with:
-
-```sh
-./scripts/configure-lightdm.sh
-```
-
-This copies the wallpaper, GTK theme, and JetBrainsMono Nerd Font to
-system-readable locations, installs the LightDM drop-in and GTK greeter
-configuration under `/etc/lightdm`, and asks for confirmation before using
-`sudo`. The original greeter configuration
-is backed up once. It does not stop the active graphical session. Use
-`./scripts/configure-lightdm.sh --check` for a read-only verification.
-
 Then run the dotfile installer from any directory. In addition to creating
 links, it applies the GTK theme, selects Kvantum, and updates the systemd and
 D-Bus user environments without relying on KDE or another desktop environment:
@@ -123,8 +112,25 @@ D-Bus user environments without relying on KDE or another desktop environment:
 ./install.sh
 ```
 
+The installer asks before replacing an existing `~/.bash_profile`. Its managed
+profile retains the standard `~/.bashrc` loading behavior and starts Sway only
+from tty1. Configure tty1 for the current user and select it for the next boot:
+
+```sh
+./scripts/configure-tty-login.sh
+```
+
+The setup script installs a `getty@tty1` override under `/etc/systemd/system`,
+configures a fixed account name so only its password is requested, sets the
+console login retry count to one in `/etc/login.defs`, disables LightDM without
+stopping the active session, and selects `multi-user.target`.
+It asks for confirmation before using `sudo`. Use
+`./scripts/configure-tty-login.sh --check` for read-only verification, or
+`--user USER` to configure another local account.
+
 It creates these symbolic links:
 
+- `~/.bash_profile` → `.bash_profile`
 - `~/.tmux.conf` → `.tmux.conf`
 - `${XDG_CONFIG_HOME:-~/.config}/alacritty` → `alacritty/`
 - `${XDG_CONFIG_HOME:-~/.config}/nvim` → `nvim/`

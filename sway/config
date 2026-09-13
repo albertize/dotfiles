@@ -82,8 +82,9 @@ exec swayidle -w \
 ### Applications
 bindsym $mod+Return exec $term
 bindsym $mod+d exec $menu
-# Lock the session manually; use Mod+Right to move focus to the right.
-bindsym $mod+l exec swaylock
+# Lock the session manually using the current wallpaper; use Mod+Right to move
+# focus to the right.
+bindsym $mod+l exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/lock.sh"'
 bindsym $mod+q kill
 bindsym Print exec $screenshot gui
 bindsym Shift+Print exec $screenshot full --clipboard

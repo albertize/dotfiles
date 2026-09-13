@@ -37,8 +37,8 @@ changes portable, reviewable, and safe to apply repeatedly.
 - `systemd/user/`: user-session targets needed by desktop services.
 - `gtk-3.0/`, `gtk-4.0/`, `Kvantum/`, `xsettingsd/`: toolkit theming.
 - `themes/`: pinned upstream theme assets and provenance.
-- `alacritty/`, `nvim/`, `.tmux.conf`, `promptrc`: terminal and development
-  environment configuration.
+- `alacritty/`, `nvim/`, `.tmux.conf`: terminal and development environment
+  configuration.
 
 ## Installation rules
 

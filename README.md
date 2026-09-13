@@ -11,7 +11,6 @@ Personal configuration files for:
 - [Swaylock](swaylock)
 - [Dunst](dunst), [Flameshot](flameshot), and a password-authenticated tty1 login
 - [GTK 3/4](gtk-3.0) and [Qt 5/6](Kvantum)
-- [Shell prompt](promptrc) — not installed automatically
 
 Sway, Waybar, Wofi, Swaylock, GTK, and Qt use Catppuccin Macchiato with the
 Blue accent. Desktop applications use the vendored Papirus-Dark icon theme

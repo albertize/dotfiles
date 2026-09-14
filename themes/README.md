@@ -5,10 +5,14 @@ contains Sway, Waybar, Wofi, Swaylock, Alacritty, tmux, Neovim, Pi, Dunst,
 Flameshot, VS Code, toolkit, icon, and wallpaper settings. `gruvbox` uses the
 canonical [Gruvbox](https://github.com/morhetz/gruvbox) dark palette and the
 Papirus brown folder colors; `catppuccin-macchiato` preserves the previous
-configuration. `gruvbox-dark` is a small, hand-written GTK 3/4 adaptation that
-layers Gruvbox colors over GTK's built-in dark defaults; it is maintained as
-source rather than as a generated vendored asset.
+configuration.
 
+- `gruvbox-dark`: the complete dark GTK 3/4 theme generated from
+  [Fausto-Korpsvart/Gruvbox-GTK-Theme](https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme)
+  at commit `578cd220b5ff6e86b078a6111d26bb20ec8c733f` (GPL-3.0). It uses the
+  upstream medium color scheme for the canonical `#282828` Gruvbox background.
+  Regenerate this vendored output with `scripts/update-gruvbox-gtk-theme.sh`;
+  the script pins Dart Sass and stores the upstream license with the theme.
 - `catppuccin-macchiato-blue-standard+default`: Catppuccin GTK v1.0.3,
   downloaded from the [official release](https://github.com/catppuccin/gtk/releases/tag/v1.0.3).
 - `Kvantum/catppuccin-macchiato-blue`: the official

@@ -45,9 +45,11 @@ done
 # shellcheck disable=SC1090
 source "$profile/theme.conf"
 : "${DISPLAY_NAME:?}" "${GTK_THEME:?}" "${GSETTINGS_ACCENT:?}" \
-  "${ICON_THEME:?}" "${QT_STYLE_OVERRIDE+x}" "${KVANTUM_THEME+x}" "${PREVIEW_COLORS:?}" \
+  "${ICON_THEME:?}" "${QT_STYLE_OVERRIDE+x}" "${KVANTUM_THEME+x}" \
+  "${KDE_COLOR_SCHEME:?}" "${KDE_ACCENT:?}" "${PREVIEW_COLORS:?}" \
   "${VSCODE_EXTENSION:?}" "${VSCODE_THEME:?}" "${WALLPAPER:?}"
-wallpaper="${XDG_DATA_HOME:-$HOME/.local/share}/backgrounds/dotfiles/$WALLPAPER"
+data_home=${XDG_DATA_HOME:-"$HOME/.local/share"}
+wallpaper="$data_home/backgrounds/dotfiles/$WALLPAPER"
 [[ -r $wallpaper ]] || {
   printf 'Theme wallpaper not found: %s\n' "$wallpaper" >&2
   exit 1
@@ -59,6 +61,11 @@ fi
 if [[ -n $KVANTUM_THEME ]] &&
    [[ ! -r $config_home/Kvantum/$KVANTUM_THEME/$KVANTUM_THEME.kvconfig ]]; then
   printf 'Kvantum theme is not installed: %s\n' "$KVANTUM_THEME" >&2
+  printf 'Run install.sh before applying this profile.\n' >&2
+  exit 1
+fi
+if [[ ! -r $data_home/color-schemes/$KDE_COLOR_SCHEME.colors ]]; then
+  printf 'KDE color scheme is not installed: %s\n' "$KDE_COLOR_SCHEME" >&2
   printf 'Run install.sh before applying this profile.\n' >&2
   exit 1
 fi
@@ -143,12 +150,35 @@ fi
 
 kconfig=()
 if command -v kwriteconfig6 >/dev/null 2>&1; then
-  kconfig=(kwriteconfig6 --file kdeglobals)
+  kconfig=(kwriteconfig6 --file kdeglobals --notify)
 elif command -v kwriteconfig5 >/dev/null 2>&1; then
-  kconfig=(kwriteconfig5 --file kdeglobals)
+  kconfig=(kwriteconfig5 --file kdeglobals --notify)
 fi
 if (( ${#kconfig[@]} > 0 )); then
+  kde_scheme_file="$data_home/color-schemes/$KDE_COLOR_SCHEME.colors"
+  section=
+  while IFS= read -r line || [[ -n $line ]]; do
+    line=${line%$'\r'}
+    case $line in
+      \[*\]) section=${line#\[}; section=${section%\]} ;;
+      *=*)
+        case $section in
+          ColorEffects:*|Colors:*|KDE|WM)
+            key=${line%%=*}
+            value=${line#*=}
+            "${kconfig[@]}" --group "$section" --key "$key" "$value" || true
+            ;;
+        esac
+        ;;
+    esac
+  done < "$kde_scheme_file"
+
   "${kconfig[@]}" --group Icons --key Theme "$ICON_THEME" || true
+  "${kconfig[@]}" --group General --key ColorScheme "$KDE_COLOR_SCHEME" || true
+  "${kconfig[@]}" --group General --key AccentColor "$KDE_ACCENT" || true
+  "${kconfig[@]}" --group General --key LastUsedCustomAccentColor "$KDE_ACCENT" || true
+  "${kconfig[@]}" --group General --key widgetStyle "$QT_STYLE_OVERRIDE" || true
+  "${kconfig[@]}" --group General --key ColorSchemeHash --delete '' || true
   for key in font fixed menuFont toolBarFont activeFont smallestReadableFont; do
     "${kconfig[@]}" --group General --key "$key" \
       'JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0' || true
@@ -163,6 +193,7 @@ if command -v systemctl >/dev/null 2>&1; then
   systemctl --user daemon-reload 2>/dev/null || true
   systemctl --user set-environment \
     "GTK_THEME=$GTK_THEME" \
+    'GTK_USE_PORTAL=1' \
     "QT_STYLE_OVERRIDE=$QT_STYLE_OVERRIDE" \
     'QT_QPA_PLATFORMTHEME=gtk3' \
     'QT_QPA_PLATFORM=wayland;xcb' 2>/dev/null || true
@@ -170,9 +201,16 @@ fi
 if command -v dbus-update-activation-environment >/dev/null 2>&1; then
   dbus-update-activation-environment --systemd \
     "GTK_THEME=$GTK_THEME" \
+    'GTK_USE_PORTAL=1' \
     "QT_STYLE_OVERRIDE=$QT_STYLE_OVERRIDE" \
     'QT_QPA_PLATFORMTHEME=gtk3' \
     'QT_QPA_PLATFORM=wayland;xcb' 2>/dev/null || true
+fi
+
+# The GTK portal keeps its theme for the lifetime of the process. Restart it
+# after publishing the environment so Electron file pickers use the new theme.
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl --user try-restart xdg-desktop-portal-gtk.service 2>/dev/null || true
 fi
 
 # Reload components that can adopt a theme without restarting their clients.

@@ -23,6 +23,8 @@ links=(
   "gtk-3.0|$config_home/gtk-3.0"
   "gtk-4.0|$config_home/gtk-4.0"
   "Kvantum/catppuccin-macchiato-blue|$config_home/Kvantum/catppuccin-macchiato-blue"
+  "KDE/color-schemes/CatppuccinMacchiato.colors|$data_home/color-schemes/CatppuccinMacchiato.colors"
+  "KDE/color-schemes/GruvboxDark.colors|$data_home/color-schemes/GruvboxDark.colors"
   "environment.d/90-wayland-toolkits.conf|$config_home/environment.d/90-wayland-toolkits.conf"
   "themes/catppuccin-macchiato-blue-standard+default|$data_home/themes/catppuccin-macchiato-blue-standard+default"
   "themes/gruvbox-dark|$data_home/themes/Gruvbox-Dark"

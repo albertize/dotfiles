@@ -52,7 +52,8 @@ local function render(buf)
     add_line(content, { { text = line, hl = "NativeHomeHeader" } })
   end
   add_line(content, {})
-  add_line(content, { { text = "Native IDE · Catppuccin Macchiato", hl = "NativeHomeTitle" } })
+  local theme_name = require("config.theme").display_name
+  add_line(content, { { text = "Native IDE · " .. theme_name, hl = "NativeHomeTitle" } })
   add_line(content, { { text = "No plugins. Just Neovim.", hl = "NativeHomeMuted" } })
   add_line(content, {})
 

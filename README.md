@@ -10,12 +10,15 @@ Personal configuration files for:
 - [Wofi](wofi)
 - [Swaylock](swaylock)
 - [Dunst](dunst), [Flameshot](flameshot), and a password-authenticated tty1 login
-- [GTK 3/4](gtk-3.0) and [Qt 5/6](Kvantum)
+- [GTK 3/4](gtk-3.0), [Qt 5/6](Kvantum), and optional VS Code synchronization
 
-Sway, Waybar, Wofi, Swaylock, GTK, and Qt use Catppuccin Macchiato with the
-Blue accent. Desktop applications use the vendored Papirus-Dark icon theme
-with violet folders. Window borders and gaps are set to three logical pixels through
-`$border` and `$gaps` in `sway/config`. The built-in `eDP-1` display uses 125%
+The desktop has switchable Gruvbox Dark and Catppuccin Macchiato profiles.
+Gruvbox is selected on the first installation and uses brown Papirus folders;
+Catppuccin uses its Blue accent and violet Papirus folders. A profile changes
+Sway, Waybar, Wofi, Alacritty, tmux, Neovim, Pi, Dunst, Flameshot, Swaylock,
+GTK/Qt, VS Code, the desktop and lock-screen wallpaper, and the published icon theme
+together. Window borders and gaps are set to
+three logical pixels through `$border` and `$gaps` in `sway/config`. The built-in `eDP-1` display uses 125%
 scaling and is centered below the external display, which may be connected
 through either `HDMI-A-1` or `DP-3`. Waybar prefers
 the upper external display and automatically moves to the laptop panel when the
@@ -38,16 +41,22 @@ correct output names on a different machine.
 - `pavucontrol` optionally, for the volume module's right-click action
 - Kvantum and GTK 3 platform-theme plugins for Qt 5 and Qt 6
 - The Adwaita cursor theme and `xsettingsd`
+- Optionally, VS Code with `jdinhlife.gruvbox` and
+  `catppuccin.catppuccin-vsc` for editor-theme synchronization
 
 The official Catppuccin GTK and Kvantum themes and the Papirus-Dark icon theme
-are vendored in this repository. The installer links the toolkit themes and
-extracts the pinned Papirus archive into `XDG_DATA_HOME/icons`. Sway passes the theme variables to new
-applications explicitly, while `environment.d` makes them globally available
-from the next login. A managed systemd user target registers Sway as a graphical
+are vendored in this repository. The installer links the toolkit themes,
+extracts the pinned Papirus archive into `XDG_DATA_HOME/icons`, and builds a
+small inheriting Papirus theme with the official brown folder palette for
+Gruvbox. The repository also provides a lightweight Gruvbox GTK theme and
+builds a matching Kvantum palette from the pinned Catppuccin engine assets, so
+Qt applications use the selected profile consistently. Sway passes
+the selected theme variables to new applications explicitly, while the theme
+application script publishes them to the systemd and D-Bus user environments. A managed systemd user target registers Sway as a graphical
 session so portal-based screenshots work even when Sway is started manually.
 See [`themes/README.md`](themes/README.md) for versions, upstream sources, and
 licenses.
-The dark theme, Papirus-Dark icons, Adwaita cursor, JetBrainsMono Nerd Font,
+The selected dark theme, Papirus icons, Adwaita cursor, JetBrainsMono Nerd Font,
 DPI, and antialiasing values are published through GSettings and XSettings so
 applications do not need application-specific overrides. The theme application
 script also updates the icon and font keys in `kdeglobals` for KDE applications
@@ -65,12 +74,15 @@ such as Dolphin, while preserving all other KDE settings.
   password when an application first accesses the login keyring.
 - `Mod+d` opens Wofi with application icons. The minimal application-grid icon
   at the left of Waybar provides the same launcher.
+- Waybar's palette button opens a compact theme selector. Each row contains only
+  the theme name and a color preview; selecting it applies the profile globally.
 - Waybar renders the focused workspace as a solid square and uses compact,
   dimmed numbers for the other workspaces that currently exist.
 - `Mod+l` locks the session manually; `Mod+Right` moves focus to the right.
 - Automatic locking is disabled; idle displays turn off after ten minutes.
-- The vendored `media/leaves_line_neon_139772_2560x1600.jpg` image is applied
-  to every output with `fill` scaling.
+- The active profile's vendored wallpaper is applied to every output and to
+  Swaylock with `fill` scaling. Gruvbox uses
+  `media/luca-bravo-zAjdgNXsMeg.jpg`.
 - New windows use an automatic Fibonacci layout with equal nested splits:
   two windows are side by side, then the right half is split vertically, and
   subsequent splits continue alternating.
@@ -104,12 +116,28 @@ invoking `sudo dnf`:
 
 Use `./scripts/install-fedora-dependencies.sh --check` for a read-only check.
 Then run the dotfile installer from any directory. In addition to creating
-links, it applies the GTK theme, selects Kvantum, and updates the systemd and
-D-Bus user environments without relying on KDE or another desktop environment:
+links, it selects the default Gruvbox profile, applies the GTK and icon themes,
+selects Kvantum, and updates the systemd and D-Bus user environments without
+relying on KDE or another desktop environment:
 
 ```sh
 ./install.sh
 ```
+
+Press `Mod+Shift+t` to select a profile with Wofi, or use the command line:
+
+```sh
+~/.config/sway/scripts/theme-switcher.sh --list
+~/.config/sway/scripts/theme-switcher.sh gruvbox
+~/.config/sway/scripts/theme-switcher.sh catppuccin-macchiato
+```
+
+The active profile is stored as the replaceable
+`${XDG_CONFIG_HOME:-~/.config}/dotfiles-theme` symlink. Switching reloads Sway,
+so the wallpaper and running desktop components update immediately. Running
+tmux and Pi sessions are refreshed as well, Neovim reloads its palette when it
+regains focus, and VS Code applies the matching installed extension live. Other
+existing GUI applications may need to be restarted.
 
 The installer asks before replacing an existing `~/.bash_profile`. Its managed
 profile retains the standard `~/.bashrc` loading behavior and starts Sway only
@@ -127,29 +155,36 @@ It asks for confirmation before using `sudo`. Use
 `./scripts/configure-tty-login.sh --check` for read-only verification, or
 `--user USER` to configure another local account.
 
-It creates these symbolic links:
+It creates these managed links and runtime files:
 
 - `~/.bash_profile` → `.bash_profile`
 - `~/.tmux.conf` → `.tmux.conf`
-- `${XDG_CONFIG_HOME:-~/.config}/alacritty` → `alacritty/`
+- `${XDG_CONFIG_HOME:-~/.config}/alacritty/alacritty.toml` →
+  `alacritty/alacritty.toml`; the adjacent generated `theme.toml` remains at a
+  stable path so Alacritty detects live theme updates
 - `${XDG_CONFIG_HOME:-~/.config}/nvim` → `nvim/`
 - `${XDG_CONFIG_HOME:-~/.config}/sway` → `sway/`
 - `${XDG_CONFIG_HOME:-~/.config}/waybar` → `waybar/`
-- `${XDG_CONFIG_HOME:-~/.config}/wofi` → `wofi/`
-- `${XDG_CONFIG_HOME:-~/.config}/swaylock` → `swaylock/`
-- `${XDG_CONFIG_HOME:-~/.config}/dunst` → `dunst/`
-- `${XDG_CONFIG_HOME:-~/.config}/flameshot` → `flameshot/`
+- `${XDG_CONFIG_HOME:-~/.config}/wofi/config` → `wofi/config`; the generated
+  `theme.css` combines the active palette with the repository stylesheet
+- `${XDG_CONFIG_HOME:-~/.config}/flameshot/flameshot.ini` is generated from the
+  active profile so D-Bus activation reads the same theme
 - `${XDG_CONFIG_HOME:-~/.config}/xdg-desktop-portal/sway-portals.conf` →
   `xdg-desktop-portal/sway-portals.conf`
 - `${XDG_CONFIG_HOME:-~/.config}/systemd/user/dotfiles-sway-session.target` →
   `systemd/user/dotfiles-sway-session.target`
 - `${XDG_CONFIG_HOME:-~/.config}/gtk-{3,4}.0` → `gtk-{3,4}.0/`
-- `${XDG_CONFIG_HOME:-~/.config}/Kvantum` → `Kvantum/`
-- `${XDG_CONFIG_HOME:-~/.config}/environment.d/90-catppuccin.conf` →
-  `environment.d/90-catppuccin.conf`
-- `${XDG_CONFIG_HOME:-~/.config}/xsettingsd` → `xsettingsd/`
+- `${XDG_CONFIG_HOME:-~/.config}/Kvantum/catppuccin-macchiato-blue` → the
+  vendored Kvantum theme; the adjacent Gruvbox variant is generated by the
+  installer
+- `${XDG_CONFIG_HOME:-~/.config}/environment.d/90-wayland-toolkits.conf` →
+  `environment.d/90-wayland-toolkits.conf`
+- `${XDG_CONFIG_HOME:-~/.config}/dotfiles-theme` → the active profile under
+  `themes/profiles/`
 - `${XDG_DATA_HOME:-~/.local/share}/themes/catppuccin-macchiato-blue-standard+default`
   → the vendored GTK theme
+- `${XDG_DATA_HOME:-~/.local/share}/themes/Gruvbox-Dark` → the maintained
+  Gruvbox GTK theme
 - `${XDG_DATA_HOME:-~/.local/share}/backgrounds/dotfiles` → `media/`
 
 If a destination already exists, the installer asks for confirmation before

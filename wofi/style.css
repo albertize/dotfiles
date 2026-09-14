@@ -1,20 +1,4 @@
-@define-color rosewater #f4dbd6;
-@define-color pink #f5bde6;
-@define-color mauve #c6a0f6;
-@define-color red #ed8796;
-@define-color peach #f5a97f;
-@define-color yellow #eed49f;
-@define-color green #a6da95;
-@define-color teal #8bd5ca;
-@define-color blue #8aadf4;
-@define-color text #cad3f5;
-@define-color subtext0 #a5adcb;
-@define-color overlay0 #6e738d;
-@define-color surface0 #363a4f;
-@define-color surface1 #494d64;
-@define-color base #24273a;
-@define-color mantle #1e2030;
-@define-color crust #181926;
+/* Theme colors are prepended when this template is rendered to theme.css. */
 
 * {
   border-radius: 0;
@@ -22,17 +6,20 @@
   font-size: 12px;
 }
 
-window {
+window,
+#window {
   margin: 0;
   padding: 0;
   color: @text;
   background-color: @base;
-  border: 1px solid @blue;
+  border: 1px solid @accent;
+  opacity: 1;
 }
 
 #outer-box {
   margin: 6px;
   padding: 0;
+  background-color: @base;
 }
 
 #input {
@@ -46,7 +33,7 @@ window {
   box-shadow: none;
 }
 
-#input:focus { border-color: @blue; }
+#input:focus { border-color: @accent; }
 
 #scroll {
   margin: 0;
@@ -62,9 +49,10 @@ window {
   background-color: transparent;
 }
 
-#entry:selected {
+#entry:selected,
+#entry:selected * {
   color: @crust;
-  background-color: @blue;
+  background-color: @accent;
   outline: none;
 }
 
@@ -73,4 +61,7 @@ window {
 }
 
 #text { color: inherit; }
-#text:selected { color: @crust; }
+#text:selected {
+  color: @crust;
+  background-color: @accent;
+}

@@ -1,4 +1,6 @@
-general.import = ["~/.config/alacritty/themes/catppuccin-macchiato.toml"]
+# This stable generated file is updated in place so Alacritty's live-reload
+# watcher notices global theme changes.
+general.import = ["theme.toml"]
 
 [font]
 size = 11.0

@@ -11,8 +11,11 @@ readonly laptop_workspace=''
 readonly config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
 readonly runtime_dir=${XDG_RUNTIME_DIR:-"/tmp/waybar-$UID"}
 readonly source_config="$config_home/waybar/config"
-readonly style="$config_home/waybar/style.css"
+readonly base_style="$config_home/waybar/style.css"
+readonly theme_style="$config_home/dotfiles-theme/waybar.css"
+readonly theme_config_filter="$config_home/dotfiles-theme/waybar.sed"
 readonly runtime_config="$runtime_dir/waybar-output.json"
+readonly runtime_style="$runtime_dir/waybar-style.css"
 readonly manager_pid_file="$runtime_dir/waybar-output-manager.pid"
 
 bar_pid=''
@@ -161,12 +164,15 @@ stop_bar() {
 start_bar() {
   local output=$1
   local temporary_config="$runtime_config.tmp"
+  local temporary_style="$runtime_style.tmp"
 
   mkdir -p -- "$runtime_dir"
-  jq --arg output "$output" '.output = [$output]' \
-    "$source_config" > "$temporary_config"
+  sed -f "$theme_config_filter" "$source_config" |
+    jq --arg output "$output" '.output = [$output]' > "$temporary_config"
+  cat -- "$theme_style" "$base_style" > "$temporary_style"
   mv -- "$temporary_config" "$runtime_config"
-  waybar --config "$runtime_config" --style "$style" &
+  mv -- "$temporary_style" "$runtime_style"
+  waybar --config "$runtime_config" --style "$runtime_style" &
   bar_pid=$!
 }
 

@@ -1,10 +1,11 @@
-# Sway — Catppuccin Macchiato
+# Sway desktop configuration. Colors, toolkit variables, and wallpaper come
+# from the profile selected by theme-switcher.sh.
 set $mod Mod4
-set $theme_env env XDG_CURRENT_DESKTOP=sway XDG_SESSION_DESKTOP=sway GTK_THEME=catppuccin-macchiato-blue-standard+default QT_STYLE_OVERRIDE=kvantum QT_QPA_PLATFORMTHEME=gtk3 QT_QPA_PLATFORM=wayland
+include ~/.config/dotfiles-theme/sway.conf
 set $term $theme_env alacritty
 set $menu $theme_env wofi --show drun --allow-images
 # Work around Flameshot geometry errors on fractionally scaled Wayland outputs.
-set $screenshot $theme_env env QT_AUTO_SCREEN_SCALE_FACTOR=1 flameshot
+set $screenshot $theme_env env QT_AUTO_SCREEN_SCALE_FACTOR=1 sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/flameshot.sh" "$@"' sh
 
 # Window gaps and borders, in logical pixels.
 set $gaps 3
@@ -13,9 +14,6 @@ set $border 3
 font pango:JetBrainsMono Nerd Font 10
 
 ### Appearance
-output * bg #24273a solid_color
-# Resolve the wallpaper through XDG_DATA_HOME and apply it to every output.
-exec_always --no-startup-id sh -c 'data_home=${XDG_DATA_HOME:-"$HOME/.local/share"}; exec swaymsg output "*" bg "$data_home/backgrounds/dotfiles/leaves_line_neon_139772_2560x1600.jpg" fill'
 # Center the laptop display below the unscaled external monitor. The laptop's
 # 1920x1200 panel is 1536 logical pixels wide at 125% scaling.
 # Both external connectors used on this machine are configured identically.
@@ -38,14 +36,6 @@ default_border pixel $border
 default_floating_border pixel $border
 hide_edge_borders none
 
-#                    border   background text     indicator child_border
-client.focused          #8aadf4 #8aadf4 #24273a #8aadf4    #8aadf4
-client.focused_inactive #494d64 #24273a #cad3f5 #494d64    #494d64
-client.unfocused        #363a4f #24273a #a5adcb #363a4f    #363a4f
-client.urgent           #ed8796 #ed8796 #24273a #eed49f    #ed8796
-client.placeholder      #5b6078 #24273a #cad3f5 #5b6078    #5b6078
-client.background       #24273a
-
 ### Input
 input type:keyboard {
     xkb_layout it
@@ -66,9 +56,9 @@ seat * hide_cursor 0
 
 ### Startup
 exec --no-startup-id $theme_env sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec "$config_home/sway/scripts/session.sh"'
-exec_always --no-startup-id sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec env XDG_CURRENT_DESKTOP=sway XDG_SESSION_DESKTOP=sway GTK_THEME=catppuccin-macchiato-blue-standard+default QT_STYLE_OVERRIDE=kvantum QT_QPA_PLATFORMTHEME=gtk3 QT_QPA_PLATFORM=wayland "$config_home/waybar/scripts/output-manager.sh"'
-exec_always --no-startup-id sh -c 'pkill xsettingsd 2>/dev/null || true; config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec xsettingsd --config="$config_home/xsettingsd/xsettingsd.conf"'
-exec_always --no-startup-id sh -c 'pkill dunst 2>/dev/null || true; exec dunst'
+exec_always --no-startup-id $theme_env sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec "$config_home/waybar/scripts/output-manager.sh"'
+exec_always --no-startup-id sh -c 'pkill xsettingsd 2>/dev/null || true; config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec xsettingsd --config="$config_home/dotfiles-theme/xsettingsd.conf"'
+exec_always --no-startup-id sh -c 'pkill dunst 2>/dev/null || true; config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec dunst --config "$config_home/dotfiles-theme/dunstrc"'
 # Build script paths in two steps so each pkill pattern cannot match its own
 # launcher command during a configuration reload.
 exec_always --no-startup-id sh -c 'script="$HOME/.config/sway/scripts/clipboard-history"; pkill -f "[c]lipboard-history.sh" 2>/dev/null || true; exec "$script.sh"'
@@ -198,6 +188,8 @@ mode "resize" {
     bindsym Escape mode "default"
 }
 bindsym $mod+r mode "resize"
+# Select and apply a desktop theme through Wofi.
+bindsym $mod+Shift+t exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/theme-switcher.sh"'
 
 ### Session
 bindsym $mod+Shift+c reload

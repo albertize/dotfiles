@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Gruvbox-Dark
+Comment=Minimal Gruvbox Dark toolkit theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Gruvbox-Dark
+MetacityTheme=Gruvbox-Dark
+IconTheme=Papirus-Dark-Gruvbox
+CursorTheme=Adwaita
+ButtonLayout=icon:minimize,maximize,close

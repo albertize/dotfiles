@@ -33,6 +33,7 @@ packages=(
   neovim
   pavucontrol
   pipewire
+  python3
   qt5-qtbase-gui
   qt6-qtbase-gui
   ripgrep

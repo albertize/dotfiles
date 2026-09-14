@@ -1,4 +1,6 @@
 show=drun
+# Relative paths are resolved against $XDG_CONFIG_HOME/wofi.
+stylesheet=theme.css
 prompt=Search applications…
 width=45%
 height=55%

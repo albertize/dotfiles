@@ -1,38 +1,23 @@
--- Catppuccin Macchiato implemented with Neovim's native highlight API.
--- Palette: https://github.com/catppuccin/catppuccin
-
+-- Native highlight definitions parameterized by the active global profile.
 local M = {}
 
-M.palette = {
-  rosewater = "#f4dbd6",
-  flamingo = "#f0c6c6",
-  pink = "#f5bde6",
-  mauve = "#c6a0f6",
-  red = "#ed8796",
-  maroon = "#ee99a0",
-  peach = "#f5a97f",
-  yellow = "#eed49f",
-  green = "#a6da95",
-  teal = "#8bd5ca",
-  sky = "#91d7e3",
-  sapphire = "#7dc4e4",
-  blue = "#8aadf4",
-  lavender = "#b7bdf8",
-  text = "#cad3f5",
-  subtext1 = "#b8c0e0",
-  subtext0 = "#a5adcb",
-  overlay2 = "#939ab7",
-  overlay1 = "#8087a2",
-  overlay0 = "#6e738d",
-  surface2 = "#5b6078",
-  surface1 = "#494d64",
-  surface0 = "#363a4f",
-  base = "#24273a",
-  mantle = "#1e2030",
-  crust = "#181926",
-}
+local config_home = vim.env.XDG_CONFIG_HOME or (vim.env.HOME .. "/.config")
+local profile_path = config_home .. "/dotfiles-theme/nvim.lua"
+local profile
+
+local function load_profile()
+  local chunk, load_error = loadfile(profile_path)
+  if not chunk then
+    error("Cannot load the active Neovim theme: " .. load_error)
+  end
+  return chunk()
+end
 
 function M.setup()
+  profile = load_profile()
+  M.palette = profile.palette
+  M.display_name = profile.display_name
+  M.profile_path = vim.uv.fs_realpath(profile_path)
   local c = M.palette
   local set = vim.api.nvim_set_hl
 
@@ -41,7 +26,7 @@ function M.setup()
   if vim.fn.exists("syntax_on") == 1 then
     vim.cmd("syntax reset")
   end
-  vim.g.colors_name = "native-catppuccin-macchiato"
+  vim.g.colors_name = profile.name
 
   local groups = {
     -- Editor UI.
@@ -317,7 +302,7 @@ function M.setup()
   set(0, "Italic", { italic = true })
   set(0, "Strikethrough", { strikethrough = true })
 
-  -- Match Neovim terminal buffers to Catppuccin Macchiato.
+  -- Match Neovim terminal buffers to the active profile.
   local terminal = {
     c.surface1, c.red, c.green, c.yellow, c.blue, c.pink, c.teal, c.subtext1,
     c.surface2, c.red, c.green, c.yellow, c.blue, c.pink, c.teal, c.subtext0,
@@ -326,5 +311,15 @@ function M.setup()
     vim.g["terminal_color_" .. (index - 1)] = color
   end
 end
+
+vim.api.nvim_create_autocmd("FocusGained", {
+  group = vim.api.nvim_create_augroup("GlobalThemeReload", { clear = true }),
+  callback = function()
+    if vim.uv.fs_realpath(profile_path) ~= M.profile_path then
+      M.setup()
+      vim.cmd("redraw!")
+    end
+  end,
+})
 
 return M

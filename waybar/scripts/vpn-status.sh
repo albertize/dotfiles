@@ -17,25 +17,25 @@ fi
 
 if pgrep -x openconnect >/dev/null 2>&1; then
   jq -cn \
-    --arg text '󰌾' \
+    --arg text '󰖂' \
     --arg class 'connected' \
     --arg tooltip $'OpenConnect is running\nClick to disconnect it' \
     '{text: $text, class: $class, tooltip: $tooltip}'
 elif [[ -z $vpn_script ]]; then
   jq -cn \
-    --arg text '󰌿' \
+    --arg text '󰖂' \
     --arg class 'unconfigured' \
     --arg tooltip $'VPN not configured\nSet VPN_SCRIPT to an executable absolute path' \
     '{text: $text, class: $class, tooltip: $tooltip}'
 elif [[ $vpn_script != /* || ! -f $vpn_script || ! -x $vpn_script ]]; then
   jq -cn \
-    --arg text '󰌿' \
+    --arg text '󰖂' \
     --arg class 'error' \
     --arg tooltip $'VPN configuration error\nVPN_SCRIPT is not an executable absolute path' \
     '{text: $text, class: $class, tooltip: $tooltip}'
 else
   jq -cn \
-    --arg text '󰌿' \
+    --arg text '󰖂' \
     --arg class 'disconnected' \
     --arg tooltip $'OpenConnect is not running\nClick to run the configured VPN script' \
     '{text: $text, class: $class, tooltip: $tooltip}'

@@ -5,8 +5,8 @@ set -u
 
 readonly menu_width=400
 readonly menu_height=110
-readonly connect_entry='󰌾  Connect VPN'
-readonly disconnect_entry='󰌿  Disconnect VPN'
+readonly connect_entry='󰖂  Connect VPN'
+readonly disconnect_entry='󰖂  Disconnect VPN'
 readonly config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
 readonly askpass="$config_home/waybar/scripts/wofi-askpass.sh"
 readonly runtime_dir=${XDG_RUNTIME_DIR:-"/tmp/waybar-$UID"}

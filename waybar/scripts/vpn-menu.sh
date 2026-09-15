@@ -77,7 +77,8 @@ else
     wofi --dmenu --prompt 'VPN' --width "$menu_width" --height "$menu_height") || exit 0
   [[ $choice == "$connect_entry" ]] || exit 0
 
-  if SUDO_ASKPASS="$askpass" sudo --askpass -- "$vpn_script" >/dev/null 2>&1; then
+  if SUDO_ASKPASS="$askpass" sudo --askpass --preserve-env -- "$vpn_script" \
+      >/dev/null 2>&1; then
     notify normal 'VPN script completed.'
   else
     notify critical 'The VPN script failed.'

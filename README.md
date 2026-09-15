@@ -202,10 +202,10 @@ the live GTK, Qt, systemd, or D-Bus settings.
 
 ## OpenConnect VPN applet
 
-The Waybar VPN applet uses exactly one setting: `VPN_SCRIPT`, the path of the
-existing connection script. The applet does not pass arguments, credentials, or
-additional configuration to it. Put the machine-specific absolute path in a
-local environment file; do not add the script or its details to this repository:
+The Waybar VPN applet uses exactly one applet-specific setting: `VPN_SCRIPT`,
+the path of the existing connection script. The applet does not pass arguments
+or credentials to it. Put the machine-specific absolute path in a local
+environment file; do not add the script or its details to this repository:
 
 ```ini
 # ~/.config/environment.d/95-vpn.conf
@@ -222,16 +222,23 @@ swaymsg reload
 
 When OpenConnect is not running, clicking the indicator opens a Wofi
 confirmation and executes `VPN_SCRIPT` without arguments through
-`sudo --askpass`. The existing script remains responsible for VPN credentials
-and connection. When OpenConnect is running, the action instead disconnects it
-with `sudo pkill -x openconnect`. This stops every process whose exact name is
-`openconnect`.
+`sudo --askpass --preserve-env`. The existing script remains responsible for VPN
+credentials and connection. Variables defined in `.bashrc` are available to it
+when they use `export` and Sway/Waybar was started after they were defined. Log
+out and back in after changing those exports so the graphical session inherits
+them.
 
-A separate masked Wofi prompt is shown whenever administrator authentication is
-needed. The indicator is green while an `openconnect` process is running and
-dimmed otherwise. Since the configured file is deliberately executed with
-administrator privileges, `VPN_SCRIPT` must be an absolute path to a trusted
-executable and must not point to an untrusted or group-writable file.
+When OpenConnect is running, the action instead disconnects it with
+`sudo pkill -x openconnect`. This stops every process whose exact name is
+`openconnect`. A separate masked Wofi prompt is shown whenever administrator
+authentication is needed. The indicator is green while an `openconnect` process
+is running and dimmed otherwise.
+
+Since the configured file is deliberately executed with administrator
+privileges and receives the exported user environment, `VPN_SCRIPT` must be an
+absolute path to a trusted executable and must not point to an untrusted or
+group-writable file. `sudo` still removes variables that its security policy
+forbids even when `--preserve-env` is used.
 
 ## Proxy handling
 

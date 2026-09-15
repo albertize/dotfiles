@@ -108,7 +108,9 @@ pickers adopt the active theme.
   disconnect; administrator authentication uses a masked Wofi prompt.
 - Waybar shows the Bluetooth state and connected-device count; clicking it opens
   a Wofi and `bluetoothctl` menu that can toggle Bluetooth, scan, pair, connect,
-  disconnect, trust, or remove devices.
+  disconnect, trust, or remove devices. Bluetooth power and idle-inhibitor
+  choices are stored under `${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles` and
+  restored after Sway or Waybar restarts.
 
 ## Installation
 

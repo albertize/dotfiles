@@ -56,6 +56,7 @@ seat * hide_cursor 0
 
 ### Startup
 exec --no-startup-id $theme_env sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec "$config_home/sway/scripts/session.sh"'
+exec_always --no-startup-id sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec "$config_home/waybar/scripts/bluetooth-state.sh" restore'
 exec_always --no-startup-id $theme_env sh -c 'config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec "$config_home/waybar/scripts/output-manager.sh"'
 exec_always --no-startup-id sh -c 'pkill xsettingsd 2>/dev/null || true; config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec xsettingsd --config="$config_home/dotfiles-theme/xsettingsd.conf"'
 exec_always --no-startup-id sh -c 'pkill dunst 2>/dev/null || true; config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}; exec dunst --config "$config_home/dotfiles-theme/dunstrc"'

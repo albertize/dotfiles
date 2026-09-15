@@ -21,6 +21,7 @@ readonly available_prefix='  '
 runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$UID}
 [[ -d $runtime_dir && -w $runtime_dir ]] || runtime_dir=${TMPDIR:-/tmp}
 readonly connection_marker="$runtime_dir/waybar-bluetooth-connecting-$UID"
+readonly state_script="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/scripts/bluetooth-state.sh"
 
 notify() {
   local urgency=$1
@@ -113,7 +114,11 @@ set_power() {
   output=$(bt power "$state" 2>&1)
   sleep 1
   if [[ $(controller_powered) == "$expected" ]]; then
-    return 0
+    if [[ -x $state_script ]] && "$state_script" save "$state"; then
+      return 0
+    fi
+    failed_action 'Bluetooth changed state, but it could not be saved.' ''
+    return 1
   fi
 
   failed_action 'Unable to change the Bluetooth state.' "$output"

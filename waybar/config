@@ -73,7 +73,8 @@
       "deactivated": "󰾪"
     },
     "tooltip-format-activated": "<span color='#eed49f'><b>Idle inhibitor</b></span>\nAutomatic idle actions disabled",
-    "tooltip-format-deactivated": "<span color='#a6da95'><b>Idle inhibitor</b></span>\nAutomatic idle actions enabled"
+    "tooltip-format-deactivated": "<span color='#a6da95'><b>Idle inhibitor</b></span>\nAutomatic idle actions enabled",
+    "on-click": "~/.config/waybar/scripts/idle-inhibitor-state.sh toggle"
   },
   "custom/bluetooth": {
     "exec": "~/.config/waybar/scripts/bluetooth-status.sh",

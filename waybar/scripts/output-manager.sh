@@ -17,6 +17,8 @@ readonly theme_config_filter="$config_home/dotfiles-theme/waybar.sed"
 readonly runtime_config="$runtime_dir/waybar-output.json"
 readonly runtime_style="$runtime_dir/waybar-style.css"
 readonly manager_pid_file="$runtime_dir/waybar-output-manager.pid"
+readonly state_home=${XDG_STATE_HOME:-"$HOME/.local/state"}
+readonly idle_inhibitor_state="$state_home/dotfiles/idle-inhibitor"
 
 bar_pid=''
 events_pid=''
@@ -165,10 +167,20 @@ start_bar() {
   local output=$1
   local temporary_config="$runtime_config.tmp"
   local temporary_style="$runtime_style.tmp"
+  local idle_inhibitor_activated=false
+
+  if [[ -r $idle_inhibitor_state ]] &&
+      [[ $(<"$idle_inhibitor_state") == activated ]]; then
+    idle_inhibitor_activated=true
+  fi
 
   mkdir -p -- "$runtime_dir"
   sed -f "$theme_config_filter" "$source_config" |
-    jq --arg output "$output" '.output = [$output]' > "$temporary_config"
+    jq --arg output "$output" \
+      --argjson idle_inhibitor_activated "$idle_inhibitor_activated" '
+        .output = [$output]
+        | .idle_inhibitor["start-activated"] = $idle_inhibitor_activated
+      ' > "$temporary_config"
   cat -- "$theme_style" "$base_style" > "$temporary_style"
   mv -- "$temporary_config" "$runtime_config"
   mv -- "$temporary_style" "$runtime_style"

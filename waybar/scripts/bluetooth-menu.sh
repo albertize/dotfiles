@@ -18,6 +18,9 @@ readonly back='󰁍  Back'
 readonly connected_prefix='󰂱  '
 readonly paired_prefix='󰂯  '
 readonly available_prefix='  '
+runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$UID}
+[[ -d $runtime_dir && -w $runtime_dir ]] || runtime_dir=${TMPDIR:-/tmp}
+readonly connection_marker="$runtime_dir/waybar-bluetooth-connecting-$UID"
 
 notify() {
   local urgency=$1
@@ -32,6 +35,32 @@ notify() {
 
 bt() {
   LC_ALL=C bluetoothctl "$@"
+}
+
+signal_bluetooth_status() {
+  pkill -RTMIN+9 -x waybar 2>/dev/null || true
+}
+
+clear_connection_indicator() {
+  rm -f -- "$connection_marker"
+  signal_bluetooth_status
+}
+
+run_with_connection_indicator() {
+  local temporary_marker="${connection_marker}.$$"
+  local result
+
+  (umask 077; printf '%s\n' "$$" > "$temporary_marker") || return 1
+  mv -f -- "$temporary_marker" "$connection_marker"
+  signal_bluetooth_status
+  trap clear_connection_indicator EXIT
+
+  "$@"
+  result=$?
+
+  clear_connection_indicator
+  trap - EXIT
+  return "$result"
 }
 
 controller_powered() {
@@ -206,14 +235,16 @@ device_menu() {
 
     case $choice in
       "$connect_device")
-        set_device_property "$address" connect Connected yes \
-          "${aliases[$address]} connected."
+        run_with_connection_indicator set_device_property \
+          "$address" connect Connected yes "${aliases[$address]} connected."
         ;;
       "$disconnect_device")
         set_device_property "$address" disconnect Connected no \
           "${aliases[$address]} disconnected."
         ;;
-      "$pair_device") pair_selected_device "$address" ;;
+      "$pair_device")
+        run_with_connection_indicator pair_selected_device "$address"
+        ;;
       "$trust_device")
         set_device_property "$address" trust Trusted yes \
           "${aliases[$address]} is now trusted."

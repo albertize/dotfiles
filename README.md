@@ -30,7 +30,7 @@ correct output names on a different machine.
 ## Sway requirements
 
 - `sway`, `swayidle`, `swaylock`, `waybar`, `wofi`, and `dunst`
-- `alacritty`, PipeWire/WirePlumber, `brightnessctl`, `jq`, and `nmcli`
+- `alacritty`, PipeWire/WirePlumber, `pactl`, `brightnessctl`, `jq`, and `nmcli`
 - `openconnect`, `procps-ng`, and `sudo` for the optional VPN applet
 - BlueZ (`bluetoothctl`) and `rfkill` for Bluetooth and device management
 - `cliphist` and `wl-clipboard` for clipboard history
@@ -39,7 +39,6 @@ correct output names on a different machine.
   `xdg-desktop-portal-gtk`
 - util-linux (`agetty` and `login`) for the password-authenticated tty1 login
 - JetBrainsMono Nerd Font for text and icons
-- `pavucontrol` optionally, for the volume module's right-click action
 - Kvantum and GTK 3 platform-theme plugins for Qt 5 and Qt 6
 - The Adwaita cursor theme and `xsettingsd`
 - Optionally, VS Code with `jdinhlife.gruvbox` and

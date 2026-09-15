@@ -72,7 +72,7 @@ window#waybar {
 
 #clock,
 #idle_inhibitor,
-#bluetooth,
+#custom-bluetooth,
 #pulseaudio,
 #network,
 #custom-vpn,
@@ -89,7 +89,7 @@ window#waybar {
 
 #clock,
 #idle_inhibitor,
-#bluetooth,
+#custom-bluetooth,
 #pulseaudio,
 #network,
 #custom-vpn,
@@ -104,7 +104,7 @@ window#waybar {
 
 #clock,
 #idle_inhibitor,
-#bluetooth,
+#custom-bluetooth,
 #pulseaudio,
 #network,
 #custom-vpn,
@@ -125,8 +125,8 @@ window#waybar {
   color: @red;
 }
 
-#bluetooth.disabled,
-#bluetooth.off,
+#custom-bluetooth.disabled,
+#custom-bluetooth.off,
 #pulseaudio.muted,
 #network.disconnected,
 #custom-vpn.disconnected,
@@ -136,7 +136,7 @@ window#waybar {
 
 #clock:hover,
 #idle_inhibitor:hover,
-#bluetooth:hover,
+#custom-bluetooth:hover,
 #pulseaudio:hover,
 #network:hover,
 #custom-vpn:hover,
@@ -147,6 +147,12 @@ window#waybar {
 #custom-clipboard:hover,
 #custom-power:hover {
   background: @surface0;
+}
+
+#network.linked,
+#custom-bluetooth.connecting,
+#custom-bluetooth.discovering {
+  animation: connection-blink 0.6s steps(2) infinite alternate;
 }
 
 #battery.critical:not(.charging) {
@@ -171,6 +177,10 @@ tooltip {
 
 tooltip label {
   padding: 8px 10px;
+}
+
+@keyframes connection-blink {
+  to { opacity: 0.2; }
 }
 
 @keyframes blink {

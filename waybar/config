@@ -10,7 +10,7 @@
 
   "modules-left": ["custom/launcher", "sway/workspaces", "sway/mode"],
   "modules-center": ["clock"],
-  "modules-right": ["idle_inhibitor", "bluetooth", "pulseaudio", "network", "custom/vpn", "cpu", "memory", "battery", "tray", "custom/theme", "custom/clipboard", "custom/power"],
+  "modules-right": ["idle_inhibitor", "custom/bluetooth", "pulseaudio", "network", "custom/vpn", "cpu", "memory", "battery", "tray", "custom/theme", "custom/clipboard", "custom/power"],
 
   "custom/launcher": {
     "format": "",
@@ -75,16 +75,13 @@
     "tooltip-format-activated": "<span color='#eed49f'><b>Idle inhibitor</b></span>\nAutomatic idle actions disabled",
     "tooltip-format-deactivated": "<span color='#a6da95'><b>Idle inhibitor</b></span>\nAutomatic idle actions enabled"
   },
-  "bluetooth": {
-    "format": "",
-    "format-disabled": "󰂲",
-    "format-off": "󰂲",
-    "format-on": "",
-    "format-connected": "󰂱",
-    "format-no-controller": "",
-    "tooltip-format": "<span color='#8aadf4'><b>Bluetooth</b></span> · {status}\n{controller_alias}\nClick to manage devices",
-    "tooltip-format-connected": "<span color='#8bd5ca'><b>Bluetooth</b></span> · {status}\nConnected devices: {num_connections}\n{device_enumerate}\nClick to manage devices",
-    "tooltip-format-enumerate-connected": "  {device_alias}",
+  "custom/bluetooth": {
+    "exec": "~/.config/waybar/scripts/bluetooth-status.sh",
+    "return-type": "json",
+    "interval": 2,
+    "signal": 9,
+    "format": "{}",
+    "tooltip": true,
     "on-click": "~/.config/waybar/scripts/bluetooth-menu.sh"
   },
   "pulseaudio": {
@@ -106,9 +103,9 @@
         "<span color='#8bd5ca'>██████████</span>"
       ]
     },
-    "tooltip-format": "<span color='#8bd5ca'><b>Audio</b></span> · {volume}%\n{icon}\n{desc}\nScroll: adjust volume\nClick: mute · Right click: mixer",
-    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-    "on-click-right": "pavucontrol"
+    "tooltip-format": "<span color='#8bd5ca'><b>Audio</b></span> · {volume}%\n{icon}\n{desc}\nScroll: adjust volume\nClick: configure · Right click: mute",
+    "on-click": "~/.config/waybar/scripts/audio-menu.sh",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
   },
   "network": {
     "format-wifi": "",

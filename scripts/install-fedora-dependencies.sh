@@ -31,8 +31,10 @@ packages=(
   libsecret
   NetworkManager
   neovim
+  openconnect
   pavucontrol
   pipewire
+  procps-ng
   python3
   qt5-qtbase-gui
   qt6-qtbase-gui
@@ -40,6 +42,7 @@ packages=(
   sway
   swayidle
   swaylock
+  sudo
   tmux
   tuned-ppd
   util-linux

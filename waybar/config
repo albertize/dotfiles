@@ -10,7 +10,7 @@
 
   "modules-left": ["custom/launcher", "sway/workspaces", "sway/mode"],
   "modules-center": ["clock"],
-  "modules-right": ["idle_inhibitor", "bluetooth", "pulseaudio", "network", "cpu", "memory", "battery", "tray", "custom/theme", "custom/clipboard", "custom/power"],
+  "modules-right": ["idle_inhibitor", "bluetooth", "pulseaudio", "network", "custom/vpn", "cpu", "memory", "battery", "tray", "custom/theme", "custom/clipboard", "custom/power"],
 
   "custom/launcher": {
     "format": "",
@@ -132,6 +132,15 @@
     "tooltip-format-ethernet": "<span color='#7dc4e4'><b>Ethernet</b></span>\n{ifname}: {ipaddr}/{cidr}\nGateway: {gwaddr}\nClick to manage networks",
     "tooltip-format-disconnected": "<span color='#ed8796'><b>Network disconnected</b></span>\nClick to select a network",
     "on-click": "~/.config/waybar/scripts/network-menu.sh"
+  },
+  "custom/vpn": {
+    "exec": "~/.config/waybar/scripts/vpn-status.sh",
+    "return-type": "json",
+    "interval": 5,
+    "signal": 8,
+    "format": "{}",
+    "tooltip": true,
+    "on-click": "~/.config/waybar/scripts/vpn-menu.sh"
   },
   "cpu": {
     "interval": 5,

@@ -75,6 +75,7 @@ window#waybar {
 #bluetooth,
 #pulseaudio,
 #network,
+#custom-vpn,
 #cpu,
 #memory,
 #battery,
@@ -91,6 +92,7 @@ window#waybar {
 #bluetooth,
 #pulseaudio,
 #network,
+#custom-vpn,
 #cpu,
 #memory,
 #battery,
@@ -105,6 +107,7 @@ window#waybar {
 #bluetooth,
 #pulseaudio,
 #network,
+#custom-vpn,
 #cpu,
 #memory,
 #battery,
@@ -114,10 +117,20 @@ window#waybar {
   color: @text;
 }
 
+#custom-vpn.connected {
+  color: @green;
+}
+
+#custom-vpn.error {
+  color: @red;
+}
+
 #bluetooth.disabled,
 #bluetooth.off,
 #pulseaudio.muted,
-#network.disconnected {
+#network.disconnected,
+#custom-vpn.disconnected,
+#custom-vpn.unconfigured {
   opacity: 0.55;
 }
 
@@ -126,6 +139,7 @@ window#waybar {
 #bluetooth:hover,
 #pulseaudio:hover,
 #network:hover,
+#custom-vpn:hover,
 #cpu:hover,
 #memory:hover,
 #battery:hover,

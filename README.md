@@ -31,6 +31,7 @@ correct output names on a different machine.
 
 - `sway`, `swayidle`, `swaylock`, `waybar`, `wofi`, and `dunst`
 - `alacritty`, PipeWire/WirePlumber, `brightnessctl`, `jq`, and `nmcli`
+- `openconnect`, `procps-ng`, and `sudo` for the optional VPN applet
 - BlueZ (`bluetoothctl`) and `rfkill` for Bluetooth and device management
 - `cliphist` and `wl-clipboard` for clipboard history
 - `gnome-keyring`, `gnome-keyring-pam`, and `libsecret` for secret storage
@@ -103,6 +104,9 @@ pickers adopt the active theme.
 - Clicking Waybar's network indicator opens a Wofi and `nmcli` menu that can
   toggle Wi-Fi, scan, connect to visible or hidden networks, request a password,
   and disconnect.
+- Waybar's VPN indicator reports whether OpenConnect is running. Clicking it
+  executes `VPN_SCRIPT` to connect or runs `sudo pkill -x openconnect` to
+  disconnect; administrator authentication uses a masked Wofi prompt.
 - Waybar shows the Bluetooth state and connected-device count; clicking it opens
   a Wofi and `bluetoothctl` menu that can toggle Bluetooth, scan, pair, connect,
   disconnect, trust, or remove devices.
@@ -195,6 +199,39 @@ It creates these managed links and runtime files:
 If a destination already exists, the installer asks for confirmation before
 replacing it. Set `DOTFILES_SKIP_THEME_APPLY=1` to create links without changing
 the live GTK, Qt, systemd, or D-Bus settings.
+
+## OpenConnect VPN applet
+
+The Waybar VPN applet uses exactly one setting: `VPN_SCRIPT`, the path of the
+existing connection script. The applet does not pass arguments, credentials, or
+additional configuration to it. Put the machine-specific absolute path in a
+local environment file; do not add the script or its details to this repository:
+
+```ini
+# ~/.config/environment.d/95-vpn.conf
+VPN_SCRIPT=/absolute/path/to/private-vpn-script
+```
+
+Environment files do not expand `~`. Log out and back in after creating the
+file, or reload the user manager's environment and Sway:
+
+```sh
+systemctl --user daemon-reload
+swaymsg reload
+```
+
+When OpenConnect is not running, clicking the indicator opens a Wofi
+confirmation and executes `VPN_SCRIPT` without arguments through
+`sudo --askpass`. The existing script remains responsible for VPN credentials
+and connection. When OpenConnect is running, the action instead disconnects it
+with `sudo pkill -x openconnect`. This stops every process whose exact name is
+`openconnect`.
+
+A separate masked Wofi prompt is shown whenever administrator authentication is
+needed. The indicator is green while an `openconnect` process is running and
+dimmed otherwise. Since the configured file is deliberately executed with
+administrator privileges, `VPN_SCRIPT` must be an absolute path to a trusted
+executable and must not point to an untrusted or group-writable file.
 
 ## Proxy handling
 

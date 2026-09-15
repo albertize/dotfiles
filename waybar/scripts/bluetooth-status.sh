@@ -56,9 +56,18 @@ if [[ $powered != yes ]]; then
   exit 0
 fi
 
-mapfile -t connected_devices < <(
+connected_devices=()
+while read -r address alias; do
+  [[ -n $address && -n $alias ]] || continue
+  info=$(LC_ALL=C bluetoothctl info "$address" 2>/dev/null || true)
+  battery=$(printf '%s\n' "$info" |
+    awk -F'[()]' '/Battery Percentage:/ { print $2; exit }')
+  device="$(pango_escape "$alias")"
+  [[ $battery =~ ^[0-9]+$ ]] && device+=" · ${battery}%"
+  connected_devices+=("$device")
+done < <(
   LC_ALL=C bluetoothctl devices Connected 2>/dev/null |
-    sed -n 's/^Device [[:xdigit:]:]\{17\} //p'
+    sed -n 's/^Device \([[:xdigit:]:]\{17\}\) /\1 /p'
 )
 connection_count=${#connected_devices[@]}
 
@@ -80,7 +89,7 @@ if ((connection_count > 0)); then
   text='󰂱'
   device_list=''
   for device in "${connected_devices[@]}"; do
-    device_list+=$'\n  '"$(pango_escape "$device")"
+    device_list+=$'\n  '"$device"
   done
   tooltip="<span color=\"#8bd5ca\"><b>Bluetooth</b></span> · $status"$'\n'
   tooltip+="$controller_alias"$'\n'

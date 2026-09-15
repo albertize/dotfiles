@@ -7,20 +7,22 @@ readonly menu_height=360
 readonly input_height=135
 readonly enable_bluetooth='  Enable Bluetooth'
 readonly disable_bluetooth='󰂲  Disable Bluetooth'
-readonly scan_devices='󰑐  Scan for devices'
-readonly connect_device='󰂱  Connect'
+readonly scan_devices='󰑐  Scan and refresh devices'
+readonly connect_device='󰂱  Connect or reconnect'
 readonly disconnect_device='󰂲  Disconnect'
 readonly pair_device='󰌹  Pair'
 readonly trust_device='󰌾  Trust'
 readonly untrust_device='󰌿  Untrust'
 readonly remove_device='󰆴  Remove device'
 readonly back='󰁍  Back'
+readonly close_menu_status=10
 readonly connected_prefix='󰂱  '
 readonly paired_prefix='󰂯  '
 readonly available_prefix='  '
 runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$UID}
 [[ -d $runtime_dir && -w $runtime_dir ]] || runtime_dir=${TMPDIR:-/tmp}
 readonly connection_marker="$runtime_dir/waybar-bluetooth-connecting-$UID"
+readonly watcher_pid_file="$runtime_dir/waybar-bluetooth-watcher-$UID.pid"
 readonly state_script="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/scripts/bluetooth-state.sh"
 
 notify() {
@@ -39,7 +41,13 @@ bt() {
 }
 
 signal_bluetooth_status() {
-  pkill -RTMIN+9 -x waybar 2>/dev/null || true
+  local watcher_pid
+
+  [[ -r $watcher_pid_file ]] || return 0
+  read -r watcher_pid < "$watcher_pid_file" || return 0
+  if [[ $watcher_pid =~ ^[0-9]+$ ]] && kill -0 "$watcher_pid" 2>/dev/null; then
+    kill -USR1 "$watcher_pid" 2>/dev/null || true
+  fi
 }
 
 clear_connection_indicator() {
@@ -136,6 +144,7 @@ set_device_property() {
   output=$(bt --timeout 20 "$command" "$address" 2>&1)
   sleep 1
   if [[ $(device_property "$address" "$property") == "$expected" ]]; then
+    signal_bluetooth_status
     notify normal "$success_message"
     return 0
   fi
@@ -155,6 +164,7 @@ pair_selected_device() {
     LC_ALL=C bluetoothctl --agent DisplayYesNo --timeout 30 pair "$address" 2>&1)
   sleep 1
   if [[ $(device_property "$address" Paired) == yes ]]; then
+    signal_bluetooth_status
     notify normal "${aliases[$address]} paired."
     return 0
   fi
@@ -200,6 +210,23 @@ load_devices() {
   done < <(bt "${command[@]}" 2>/dev/null)
 }
 
+load_device_details() {
+  local address=$1
+  local info battery rssi trusted_state
+
+  info=$(bt info "$address" 2>/dev/null || true)
+  battery=$(printf '%s\n' "$info" |
+    awk -F'[()]' '/Battery Percentage:/ { print $2; exit }')
+  rssi=$(printf '%s\n' "$info" |
+    awk -F'[()]' '/^[[:space:]]*RSSI:/ { print $2; exit }')
+  trusted_state=$(printf '%s\n' "$info" |
+    awk -F': ' '/^[[:space:]]*Trusted:/ { print $2; exit }')
+
+  [[ $battery =~ ^[0-9]+$ ]] && battery_levels["$address"]=$battery
+  [[ $rssi =~ ^-?[0-9]+$ ]] && signal_levels["$address"]=$rssi
+  [[ $trusted_state == yes ]] && trusted_devices["$address"]=1
+}
+
 extract_address() {
   local entry=$1
 
@@ -242,25 +269,33 @@ device_menu() {
       "$connect_device")
         run_with_connection_indicator set_device_property \
           "$address" connect Connected yes "${aliases[$address]} connected."
+        return "$close_menu_status"
         ;;
       "$disconnect_device")
         set_device_property "$address" disconnect Connected no \
           "${aliases[$address]} disconnected."
+        return "$close_menu_status"
         ;;
       "$pair_device")
         run_with_connection_indicator pair_selected_device "$address"
+        return "$close_menu_status"
         ;;
       "$trust_device")
         set_device_property "$address" trust Trusted yes \
           "${aliases[$address]} is now trusted."
+        return "$close_menu_status"
         ;;
       "$untrust_device")
         set_device_property "$address" untrust Trusted no \
           "${aliases[$address]} is no longer trusted."
+        return "$close_menu_status"
         ;;
-      "$remove_device") remove_selected_device "$address"; return 0 ;;
+      "$remove_device")
+        remove_selected_device "$address"
+        return "$close_menu_status"
+        ;;
       "$back") return 0 ;;
-      *) return 0 ;;
+      *) return "$close_menu_status" ;;
     esac
   done
 }
@@ -278,7 +313,8 @@ bt list 2>/dev/null | grep -q '^Controller ' || {
 }
 
 while true; do
-  declare -A aliases=() paired=() connected=()
+  declare -A aliases=() paired=() connected=() trusted_devices=()
+  declare -A battery_levels=() signal_levels=()
   entries=()
 
   if [[ $(controller_powered) != yes ]]; then
@@ -296,12 +332,20 @@ while true; do
     done
 
     for address in "${!aliases[@]}"; do
+      load_device_details "$address"
+      details=''
+      [[ -n ${trusted_devices[$address]+x} ]] && details+=' · trusted'
+      [[ -n ${battery_levels[$address]+x} ]] &&
+        details+=" · ${battery_levels[$address]}%"
+      [[ -n ${signal_levels[$address]+x} ]] &&
+        details+=" · ${signal_levels[$address]} dBm"
+
       if [[ -n ${connected[$address]+x} ]]; then
-        entries+=("${connected_prefix}${aliases[$address]}  [$address]")
+        entries+=("${connected_prefix}${aliases[$address]} · connected${details}  [$address]")
       elif [[ -n ${paired[$address]+x} ]]; then
-        entries+=("${paired_prefix}${aliases[$address]}  [$address]")
+        entries+=("${paired_prefix}${aliases[$address]} · paired${details}  [$address]")
       else
-        entries+=("${available_prefix}${aliases[$address]}  [$address]")
+        entries+=("${available_prefix}${aliases[$address]} · available${details}  [$address]")
       fi
     done
   fi
@@ -311,7 +355,7 @@ while true; do
       --width "$menu_width" --height "$menu_height") || exit 0
 
   case $choice in
-    "$enable_bluetooth") set_power on yes || true ;;
+    "$enable_bluetooth") set_power on yes; exit $? ;;
     "$disable_bluetooth") set_power off no; exit $? ;;
     "$scan_devices")
       notify normal 'Scanning for devices for 8 seconds…'
@@ -321,6 +365,8 @@ while true; do
       address=$(extract_address "$choice")
       [[ -n $address && -n ${aliases[$address]+x} ]] || exit 0
       device_menu "$address"
+      result=$?
+      ((result == 0)) || exit 0
       ;;
   esac
 done

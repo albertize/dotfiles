@@ -32,9 +32,9 @@ packages=(
   NetworkManager
   neovim
   openconnect
-  pavucontrol
   pipewire
   procps-ng
+  pulseaudio-utils
   python3
   qt5-qtbase-gui
   qt6-qtbase-gui

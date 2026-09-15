@@ -81,7 +81,7 @@ bindsym Print exec $screenshot gui
 bindsym Shift+Print exec $screenshot full --clipboard
 bindsym $mod+n exec dunstctl history-pop
 bindsym $mod+Shift+n exec dunstctl close-all
-bindsym $mod+Ctrl+n exec dunstctl set-paused toggle
+bindsym $mod+Ctrl+n exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/scripts/notifications-menu.sh" toggle-pause'
 
 # Audio and brightness
 bindsym XF86AudioRaiseVolume exec sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/volume.sh" up'

@@ -30,7 +30,8 @@ correct output names on a different machine.
 ## Sway requirements
 
 - `sway`, `swayidle`, `swaylock`, `waybar`, `wofi`, and `dunst`
-- `alacritty`, PipeWire/WirePlumber, `pactl`, `brightnessctl`, `jq`, and `nmcli`
+- `alacritty`, PipeWire/WirePlumber, `pulseaudio-utils` (`pactl`),
+  `brightnessctl`, `jq`, and `nmcli`
 - `openconnect`, `procps-ng`, and `sudo` for the optional VPN applet
 - BlueZ (`bluetoothctl`) and `rfkill` for Bluetooth and device management
 - `cliphist` and `wl-clipboard` for clipboard history
@@ -89,28 +90,42 @@ pickers adopt the active theme.
 - New windows use an automatic Fibonacci layout with equal nested splits:
   two windows are side by side, then the right half is split vertically, and
   subsequent splits continue alternating.
-- Audio and brightness keys show replaceable Dunst progress indicators.
+- Audio and brightness keys show replaceable Dunst progress indicators. Clicking
+  Waybar's audio indicator opens a Wofi menu for selecting output and input
+  devices, hardware ports, and audio-card profiles such as analog, HDMI,
+  A2DP, and HFP/HSP. Active application streams can be moved between devices
+  or have their volume and mute state adjusted independently.
 - `Print` opens Flameshot's region editor; `Shift+Print` copies all outputs.
   Flameshot uses automatic Qt scaling without its magnifier to avoid zoomed
   capture geometry on fractionally scaled Wayland outputs.
 - `Mod+n` restores the last notification, `Mod+Shift+n` clears notifications,
-  and `Mod+Ctrl+n` pauses or resumes Dunst.
+  and `Mod+Ctrl+n` persistently pauses or resumes Dunst. Waybar's notification
+  button opens a Wofi menu for browsing, restoring, deleting, or clearing
+  notification history.
 - Waybar's clipboard button opens history with Wofi; right-click deletes one
   entry and middle-click clears the entire history.
 - Right-clicking Waybar's battery indicator opens a Wofi menu for selecting the
   battery-save, balanced, or performance power profile.
-- Waybar's power button provides lock, logout, and power-off actions.
+- Waybar's power button provides lock, suspend, logout, restart, and power-off
+  actions, plus hibernation when logind reports it as available. Restart and
+  power-off actions require confirmation.
 - Clicking Waybar's network indicator opens a Wofi and `nmcli` menu that can
   toggle Wi-Fi, scan, connect to visible or hidden networks, request a password,
-  and disconnect.
+  and disconnect. Networks are sorted by signal strength and show active,
+  security, and signal indicators. A separate submenu can activate, disconnect,
+  or forget saved NetworkManager Wi-Fi profiles.
 - Waybar's VPN indicator reports whether OpenConnect is running. Clicking it
   executes `VPN_SCRIPT` to connect or runs `sudo pkill -x openconnect` to
   disconnect; administrator authentication uses a masked Wofi prompt.
 - Waybar shows the Bluetooth state and connected-device count; clicking it opens
   a Wofi and `bluetoothctl` menu that can toggle Bluetooth, scan, pair, connect,
-  disconnect, trust, or remove devices. Bluetooth power and idle-inhibitor
-  choices are stored under `${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles` and
-  restored after Sway or Waybar restarts.
+  reconnect, disconnect, trust, or remove devices. Device entries show paired,
+  trusted, connected, battery, and signal details when BlueZ provides them.
+  An event-driven monitor refreshes connection state immediately instead of
+  waiting for a polling interval. Bluetooth power, notification pause,
+  and idle-inhibitor choices are stored under
+  `${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles` and restored after Sway,
+  Dunst, or Waybar restarts.
 
 ## Installation
 

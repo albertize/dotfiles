@@ -10,7 +10,7 @@
 
   "modules-left": ["custom/launcher", "sway/workspaces", "sway/mode"],
   "modules-center": ["clock"],
-  "modules-right": ["idle_inhibitor", "custom/bluetooth", "pulseaudio", "network", "custom/vpn", "cpu", "memory", "battery", "tray", "custom/theme", "custom/clipboard", "custom/power"],
+  "modules-right": ["idle_inhibitor", "custom/notifications", "custom/bluetooth", "pulseaudio", "network", "custom/vpn", "cpu", "memory", "battery", "tray", "custom/theme", "custom/clipboard", "custom/power"],
 
   "custom/launcher": {
     "format": "",
@@ -76,11 +76,21 @@
     "tooltip-format-deactivated": "<span color='#a6da95'><b>Idle inhibitor</b></span>\nAutomatic idle actions enabled",
     "on-click": "~/.config/waybar/scripts/idle-inhibitor-state.sh toggle"
   },
-  "custom/bluetooth": {
-    "exec": "~/.config/waybar/scripts/bluetooth-status.sh",
+  "custom/notifications": {
+    "exec": "~/.config/waybar/scripts/notifications-status.sh",
     "return-type": "json",
     "interval": 2,
-    "signal": 9,
+    "signal": 10,
+    "format": "{}",
+    "tooltip": true,
+    "on-click": "~/.config/waybar/scripts/notifications-menu.sh",
+    "on-click-right": "~/.config/waybar/scripts/notifications-menu.sh toggle-pause"
+  },
+  "custom/bluetooth": {
+    "exec": "~/.config/waybar/scripts/bluetooth-watch.sh",
+    "return-type": "json",
+    "restart-interval": 2,
+    "exec-on-event": false,
     "format": "{}",
     "tooltip": true,
     "on-click": "~/.config/waybar/scripts/bluetooth-menu.sh"

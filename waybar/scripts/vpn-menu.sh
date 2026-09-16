@@ -3,6 +3,9 @@
 # Run the configured VPN script with administrator privileges.
 set -u
 
+script_path=$(readlink -f -- "${BASH_SOURCE[0]}")
+repo_dir=$(CDPATH= cd -- "$(dirname -- "$script_path")/../.." && pwd -P)
+
 readonly menu_width=400
 readonly menu_height=110
 readonly connect_entry='󰖂  Connect VPN'
@@ -36,6 +39,10 @@ done
   notify critical "Sudo askpass helper is not executable: $askpass"
   exit 1
 }
+
+if source -- "$repo_dir/scripts/proxy-env.sh" 2>/dev/null; then
+  proxy_env_apply || true
+fi
 
 manager_environment=''
 if command -v systemctl >/dev/null 2>&1; then

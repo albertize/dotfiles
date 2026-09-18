@@ -14,6 +14,7 @@ readonly source_config="$config_home/waybar/config"
 readonly base_style="$config_home/waybar/style.css"
 readonly theme_style="$config_home/dotfiles-theme/waybar.css"
 readonly theme_config_filter="$config_home/dotfiles-theme/waybar.sed"
+readonly font_style="$config_home/dotfiles-font/font.css"
 readonly runtime_config="$runtime_dir/waybar-output.json"
 readonly runtime_style="$runtime_dir/waybar-style.css"
 readonly manager_pid_file="$runtime_dir/waybar-output-manager.pid"
@@ -199,7 +200,7 @@ start_bar() {
         .output = [$output]
         | .idle_inhibitor["start-activated"] = $idle_inhibitor_activated
       ' > "$temporary_config"
-  cat -- "$theme_style" "$base_style" > "$temporary_style"
+  cat -- "$theme_style" "$base_style" "$font_style" > "$temporary_style"
   mv -- "$temporary_config" "$runtime_config"
   mv -- "$temporary_style" "$runtime_style"
   waybar --config "$runtime_config" --style "$runtime_style" &

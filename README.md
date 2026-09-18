@@ -41,11 +41,11 @@ correct output names on a different machine.
 - `flameshot`, `xdg-desktop-portal`, `xdg-desktop-portal-wlr`, and
   `xdg-desktop-portal-gtk`
 - util-linux (`agetty` and `login`) for the password-authenticated tty1 login
-- JetBrainsMono Nerd Font for text and icons
+- MesloLGS and JetBrainsMono Nerd Fonts for selectable text and icons
 - Kvantum and GTK 3 platform-theme plugins for Qt 5 and Qt 6
 - The Adwaita cursor theme and `xsettingsd`
-- Optionally, VS Code with `jdinhlife.gruvbox` and
-  `catppuccin.catppuccin-vsc` for editor-theme synchronization
+- Optionally, VS Code; `jdinhlife.gruvbox` and `catppuccin.catppuccin-vsc`
+  enable matching editor-theme synchronization
 
 The official Catppuccin GTK and Kvantum themes and the Papirus-Dark icon theme
 are vendored in this repository. The installer links the toolkit themes,
@@ -60,11 +60,13 @@ application script publishes them to the systemd and D-Bus user environments. A 
 session so portal-based screenshots work even when Sway is started manually.
 See [`themes/README.md`](themes/README.md) for versions, upstream sources, and
 licenses.
-The selected dark theme, Papirus icons, Adwaita cursor, JetBrainsMono Nerd Font,
+The selected dark theme, Papirus icons, Adwaita cursor, selected Nerd Font,
 DPI, and antialiasing values are published through GSettings and XSettings so
 applications do not need application-specific overrides. The theme application
 script also updates the color scheme, accent, widget style, icon, and font keys
-in `kdeglobals` for KDE applications such as Gwenview and Dolphin. It republishes
+in `kdeglobals` for KDE applications such as Gwenview and Dolphin. Detected
+VS Code installations receive the selected font for both the editor and
+integrated terminal. It republishes
 the toolkit environment and restarts the GTK portal backend so Electron file
 pickers adopt the active theme.
 
@@ -80,10 +82,13 @@ pickers adopt the active theme.
   password when an application first accesses the login keyring.
 - `Mod+d` opens Wofi with application icons. The minimal application-grid icon
   at the left of Waybar provides the same launcher.
-- Waybar's palette button opens a compact theme selector. Each row contains only
-  the theme name and a color preview; selecting it applies the profile globally.
-- Waybar renders the focused workspace as a solid square and uses compact,
-  dimmed numbers for the other workspaces that currently exist.
+- Waybar's palette button opens a compact appearance applet with separate
+  Themes and Fonts submenus. Each submenu marks the active choice, and the
+  theme submenu includes color previews. The lists grow automatically as new
+  profiles are added.
+- Waybar renders workspace names without a background. The focused workspace
+  uses the same strong foreground color as the Sway application-launcher icon,
+  while the others remain compact and dimmed.
 - `Mod+l` locks the session manually; `Mod+Right` moves focus to the right.
 - Automatic locking is disabled; idle displays turn off after ten minutes.
 - The active profile's vendored wallpaper is applied to every output and to
@@ -131,9 +136,9 @@ pickers adopt the active theme.
 
 ## Installation
 
-On Fedora, install all system dependencies and the pinned JetBrainsMono Nerd
-Font first. The script lists missing packages and asks for confirmation before
-invoking `sudo dnf`:
+On Fedora, install all system dependencies and the pinned MesloLGS and
+JetBrainsMono Nerd Fonts first. The script lists missing packages and asks for
+confirmation before invoking `sudo dnf`:
 
 ```sh
 ./scripts/install-fedora-dependencies.sh
@@ -149,20 +154,28 @@ relying on KDE or another desktop environment:
 ./install.sh
 ```
 
-Press `Mod+Shift+t` to select a profile with Wofi, or use the command line:
+Press `Mod+Shift+t` or click Waybar's palette button to open the Wofi
+appearance applet, then enter the Themes or Fonts submenu. The same applet
+retains command-line operations for automation:
 
 ```sh
 ~/.config/sway/scripts/theme-switcher.sh --list
 ~/.config/sway/scripts/theme-switcher.sh gruvbox
-~/.config/sway/scripts/theme-switcher.sh catppuccin-macchiato
+~/.config/sway/scripts/theme-switcher.sh --list-fonts
+~/.config/sway/scripts/theme-switcher.sh --font meslo-lg
 ```
 
+MesloLGS (the small-line-gap MesloLG variant) is the default font. The common
+`meslo`, `meslolg`, and `jetbrains` font aliases are also accepted.
+
 The active profile is stored as the replaceable
-`${XDG_CONFIG_HOME:-~/.config}/dotfiles-theme` symlink. Switching reloads Sway,
+`${XDG_CONFIG_HOME:-~/.config}/dotfiles-theme` symlink, while the font uses
+`${XDG_CONFIG_HOME:-~/.config}/dotfiles-font`. Switching either reloads Sway,
 so the wallpaper and running desktop components update immediately. Running
 tmux and Pi sessions are refreshed as well, Neovim reloads its palette when it
-regains focus, and VS Code applies the matching installed extension live. Other
-existing GUI applications may need to be restarted.
+regains focus, and VS Code applies the selected editor and terminal font plus
+any matching installed theme extension live. Other existing GUI applications
+may need to be restarted.
 
 The installer asks before replacing an existing `~/.bash_profile`. Its managed
 profile retains the standard `~/.bashrc` loading behavior and starts Sway only
@@ -185,8 +198,8 @@ It creates these managed links and runtime files:
 - `~/.bash_profile` → `.bash_profile`
 - `~/.tmux.conf` → `.tmux.conf`
 - `${XDG_CONFIG_HOME:-~/.config}/alacritty/alacritty.toml` →
-  `alacritty/alacritty.toml`; the adjacent generated `theme.toml` remains at a
-  stable path so Alacritty detects live theme updates
+  `alacritty/alacritty.toml`; the adjacent generated `theme.toml` and
+  `font.toml` remain at stable paths so Alacritty detects live updates
 - `${XDG_CONFIG_HOME:-~/.config}/nvim` → `nvim/`
 - `${XDG_CONFIG_HOME:-~/.config}/sway` → `sway/`
 - `${XDG_CONFIG_HOME:-~/.config}/waybar` → `waybar/`
@@ -208,6 +221,8 @@ It creates these managed links and runtime files:
   `environment.d/90-wayland-toolkits.conf`
 - `${XDG_CONFIG_HOME:-~/.config}/dotfiles-theme` → the active profile under
   `themes/profiles/`
+- `${XDG_CONFIG_HOME:-~/.config}/dotfiles-font` → the active profile under
+  `fonts/profiles/`
 - `${XDG_DATA_HOME:-~/.local/share}/themes/catppuccin-macchiato-blue-standard+default`
   → the vendored GTK theme
 - `${XDG_DATA_HOME:-~/.local/share}/themes/Gruvbox-Dark` → the maintained

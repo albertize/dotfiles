@@ -4,7 +4,6 @@
   min-height: 0;
   border: none;
   border-radius: 0;
-  font-family: "JetBrainsMono Nerd Font";
   font-size: 12px;
 }
 
@@ -56,12 +55,14 @@ window#waybar {
   color: @text;
   background: transparent;
   font-size: 14px;
+  font-weight: 700;
   opacity: 1;
 }
 
 #workspaces button.urgent {
-  color: @text;
-  background: @surface0;
+  color: @red;
+  background: transparent;
+  font-weight: 700;
   opacity: 1;
 }
 
@@ -121,7 +122,7 @@ window#waybar {
 }
 
 #custom-vpn.connected {
-  color: @green;
+  color: @text;
 }
 
 #custom-vpn.error {

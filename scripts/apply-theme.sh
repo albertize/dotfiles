@@ -9,12 +9,17 @@ config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
 pi_agent_dir=${PI_CODING_AGENT_DIR:-"$HOME/.pi/agent"}
 pi_settings="$pi_agent_dir/settings.json"
 alacritty_theme="$config_home/alacritty/theme.toml"
+alacritty_font="$config_home/alacritty/font.toml"
 alacritty_marker="$config_home/alacritty/.dotfiles-theme-managed"
 wofi_theme="$config_home/wofi/theme.css"
 wofi_marker="$config_home/wofi/.dotfiles-theme-managed"
 flameshot_config="$config_home/flameshot/flameshot.ini"
 flameshot_marker="$config_home/flameshot/.dotfiles-theme-managed"
 active_theme="$config_home/dotfiles-theme"
+active_font="$config_home/dotfiles-font"
+runtime_dir="$config_home/dotfiles-runtime"
+xsettings_config="$runtime_dir/xsettingsd.conf"
+dunst_config="$runtime_dir/dunstrc"
 theme=${1:-}
 
 if [[ -z $theme && -L $active_theme ]]; then
@@ -40,14 +45,36 @@ for required in "${required_files[@]}"; do
     exit 1
   }
 done
+font=${DOTFILES_FONT_PROFILE:-}
+if [[ -n $font ]]; then
+  font_profile="$repo_dir/fonts/profiles/$font"
+elif [[ -L $active_font ]]; then
+  font_profile=$(readlink -f -- "$active_font")
+else
+  printf 'Active font profile not found; run install.sh first.\n' >&2
+  exit 1
+fi
+case $font_profile in
+  "$repo_dir/fonts/profiles/"*) ;;
+  *) printf 'Active font is not managed by this repository: %s\n' "$font_profile" >&2; exit 1 ;;
+esac
+for required in font.conf font.css alacritty.toml sway.conf; do
+  [[ -r $font_profile/$required ]] || {
+    printf 'Font profile is incomplete: %s\n' "$font_profile/$required" >&2
+    exit 1
+  }
+done
 
 # The profiles are repository-managed and contain quoted scalar values only.
 # shellcheck disable=SC1090
 source "$profile/theme.conf"
+# shellcheck disable=SC1090
+source "$font_profile/font.conf"
 : "${DISPLAY_NAME:?}" "${GTK_THEME:?}" "${GSETTINGS_ACCENT:?}" \
   "${ICON_THEME:?}" "${QT_STYLE_OVERRIDE+x}" "${KVANTUM_THEME+x}" \
   "${KDE_COLOR_SCHEME:?}" "${KDE_ACCENT:?}" "${PREVIEW_COLORS:?}" \
-  "${VSCODE_EXTENSION:?}" "${VSCODE_THEME:?}" "${WALLPAPER:?}"
+  "${VSCODE_EXTENSION:?}" "${VSCODE_THEME:?}" "${WALLPAPER:?}" \
+  "${FONT_DISPLAY_NAME:?}" "${FONT_FAMILY:?}"
 data_home=${XDG_DATA_HOME:-"$HOME/.local/share"}
 wallpaper="$data_home/backgrounds/dotfiles/$WALLPAPER"
 [[ -r $wallpaper ]] || {
@@ -85,17 +112,32 @@ if [[ -e $active_theme && ! -L $active_theme ]]; then
   printf 'Refusing to replace non-symlink theme path: %s\n' "$active_theme" >&2
   exit 1
 fi
-temporary_link="$config_home/.dotfiles-theme.$$"
-trap 'rm -f -- "$temporary_link"' EXIT
-ln -s -- "$profile" "$temporary_link"
-mv -Tf -- "$temporary_link" "$active_theme"
+if [[ -e $active_font && ! -L $active_font ]]; then
+  printf 'Refusing to replace non-symlink font path: %s\n' "$active_font" >&2
+  exit 1
+fi
+temporary_theme_link="$config_home/.dotfiles-theme.$$"
+temporary_font_link="$config_home/.dotfiles-font.$$"
+trap 'rm -f -- "$temporary_theme_link" "$temporary_font_link"' EXIT
+ln -s -- "$profile" "$temporary_theme_link"
+ln -s -- "$font_profile" "$temporary_font_link"
+mv -Tf -- "$temporary_theme_link" "$active_theme"
+mv -Tf -- "$temporary_font_link" "$active_font"
 trap - EXIT
 
-# Keep the imported path stable and modify its contents so Alacritty's file
-# watcher reloads colors in existing windows, including windows running tmux.
+# Keep the imported paths stable and modify their contents so Alacritty's file
+# watcher reloads colors and fonts in existing windows, including tmux windows.
 cat -- "$profile/alacritty.toml" > "$alacritty_theme"
-cat -- "$profile/wofi.css" "$repo_dir/wofi/style.css" > "$wofi_theme"
-cat -- "$profile/flameshot.ini" > "$flameshot_config"
+cat -- "$font_profile/alacritty.toml" > "$alacritty_font"
+cat -- "$profile/wofi.css" "$repo_dir/wofi/style.css" \
+  "$font_profile/font.css" > "$wofi_theme"
+sed "s/^fontFamily=.*/fontFamily=$FONT_FAMILY/" \
+  "$profile/flameshot.ini" > "$flameshot_config"
+mkdir -p -- "$runtime_dir"
+sed "s/^Gtk\/FontName .*/Gtk\/FontName \"$FONT_FAMILY 10\"/" \
+  "$profile/xsettingsd.conf" > "$xsettings_config"
+sed "s/^[[:space:]]*font = .*/    font = $FONT_FAMILY 10/" \
+  "$profile/dunstrc" > "$dunst_config"
 
 # Pi watches the active custom theme file and reloads it in running sessions.
 mkdir -p -- "$pi_agent_dir/themes"
@@ -114,8 +156,8 @@ else
   printf '{\n  "theme": "dotfiles"\n}\n' > "$pi_settings"
 fi
 
-# VS Code reloads workbench.colorTheme when its settings file changes. Update
-# only installations that have the profile's corresponding extension enabled.
+# VS Code reloads appearance settings when its settings file changes. Fonts
+# apply to every detected installation; themes require their matching extension.
 vscode_installations=(
   'code|Code'
   'code-insiders|Code - Insiders'
@@ -125,15 +167,18 @@ for installation in "${vscode_installations[@]}"; do
   vscode_command=${installation%%|*}
   vscode_config=${installation#*|}
   command -v "$vscode_command" >/dev/null 2>&1 || continue
+  command -v python3 >/dev/null 2>&1 || {
+    printf 'python3 is required to synchronize VS Code appearance.\n' >&2
+    exit 1
+  }
+  vscode_theme=()
   if "$vscode_command" --list-extensions 2>/dev/null |
      grep -Fqix "$VSCODE_EXTENSION"; then
-    command -v python3 >/dev/null 2>&1 || {
-      printf 'python3 is required to synchronize the VS Code theme.\n' >&2
-      exit 1
-    }
-    "$repo_dir/scripts/update-vscode-theme.py" \
-      "$config_home/$vscode_config/User/settings.json" "$VSCODE_THEME"
+    vscode_theme=("$VSCODE_THEME")
   fi
+  "$repo_dir/scripts/update-vscode-settings.py" \
+    "$config_home/$vscode_config/User/settings.json" "$FONT_FAMILY" \
+    "${vscode_theme[@]}"
 done
 
 if command -v gsettings >/dev/null 2>&1 &&
@@ -145,7 +190,7 @@ if command -v gsettings >/dev/null 2>&1 &&
   fi
   gsettings set org.gnome.desktop.interface icon-theme "$ICON_THEME" || true
   gsettings set org.gnome.desktop.interface cursor-theme 'Adwaita' || true
-  gsettings set org.gnome.desktop.interface font-name 'JetBrainsMono Nerd Font 10' || true
+  gsettings set org.gnome.desktop.interface font-name "$FONT_FAMILY 10" || true
 fi
 
 kconfig=()
@@ -181,7 +226,7 @@ if (( ${#kconfig[@]} > 0 )); then
   "${kconfig[@]}" --group General --key ColorSchemeHash --delete '' || true
   for key in font fixed menuFont toolBarFont activeFont smallestReadableFont; do
     "${kconfig[@]}" --group General --key "$key" \
-      'JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0' || true
+      "$FONT_FAMILY,10,-1,5,50,0,0,0,0,0" || true
   done
 fi
 
@@ -224,3 +269,4 @@ if command -v swaymsg >/dev/null 2>&1 && swaymsg -t get_version >/dev/null 2>&1;
 fi
 
 printf 'Applied global theme: %s\n' "$DISPLAY_NAME"
+printf 'Applied global font: %s\n' "$FONT_DISPLAY_NAME"

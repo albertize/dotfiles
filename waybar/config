@@ -21,22 +21,7 @@
   "sway/workspaces": {
     "disable-scroll": true,
     "all-outputs": true,
-    "format": "{icon}",
-    "format-icons": {
-      "1": "1",
-      "2": "2",
-      "3": "3",
-      "4": "4",
-      "5": "5",
-      "6": "6",
-      "7": "7",
-      "8": "8",
-      "9": "9",
-      "": "",
-      "focused": "■",
-      "urgent": "■",
-      "default": "•"
-    }
+    "format": "{name}"
   },
   "sway/mode": {
     "format": "<span style=\"italic\">{}</span>"
@@ -195,7 +180,7 @@
   "custom/theme": {
     "format": "󰏘",
     "tooltip": true,
-    "tooltip-format": "<span color='#8aadf4'><b>Desktop theme</b></span>\nClick to select a global theme",
+    "tooltip-format": "<span color='#8aadf4'><b>Appearance</b></span>\nClick to select a theme or font",
     "on-click": "sh -c 'exec \"${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/theme-switcher.sh\"'"
   },
   "custom/clipboard": {

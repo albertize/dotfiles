@@ -272,8 +272,16 @@ install_flameshot_runtime_theme() {
       *) printf 'Skipped: %s\n' "$destination"; return 0 ;;
     esac
   fi
-  cat -- "$source" > "$destination" || return 1
-  printf '%s\n' 'Managed by the global dotfiles theme switcher.' > "$marker"
+  local font_config="$config_home/dotfiles-font/font.conf"
+  local FONT_FAMILY
+  [[ -r $font_config ]] || {
+    printf 'Active font configuration not found: %s\n' "$font_config" >&2
+    return 1
+  }
+  # shellcheck disable=SC1090
+  source "$font_config"
+  sed "s/^fontFamily=.*/fontFamily=$FONT_FAMILY/" "$source" > "$destination" || return 1
+  printf '%s\n' 'Managed by the global dotfiles profile switchers.' > "$marker"
 }
 
 install_wofi_runtime_theme() {
@@ -295,8 +303,13 @@ install_wofi_runtime_theme() {
       *) printf 'Skipped: %s\n' "$destination"; return 0 ;;
     esac
   fi
-  cat -- "$source" "$repo_dir/wofi/style.css" > "$destination" || return 1
-  printf '%s\n' 'Managed by the global dotfiles theme switcher.' > "$marker"
+  local font_style="$config_home/dotfiles-font/font.css"
+  [[ -r $font_style ]] || {
+    printf 'Active font stylesheet not found: %s\n' "$font_style" >&2
+    return 1
+  }
+  cat -- "$source" "$repo_dir/wofi/style.css" "$font_style" > "$destination" || return 1
+  printf '%s\n' 'Managed by the global dotfiles profile switchers.' > "$marker"
 }
 
 install_alacritty_runtime_theme() {
@@ -319,7 +332,41 @@ install_alacritty_runtime_theme() {
     esac
   fi
   cat -- "$source" > "$destination" || return 1
-  printf '%s\n' 'Managed by the global dotfiles theme switcher.' > "$marker"
+  printf '%s\n' 'Managed by the global dotfiles profile switchers.' > "$marker"
+}
+
+install_alacritty_runtime_font() {
+  local source="$config_home/dotfiles-font/alacritty.toml"
+  local destination="$config_home/alacritty/font.toml"
+
+  [[ -r $source ]] || {
+    printf 'Active Alacritty font not found: %s\n' "$source" >&2
+    return 1
+  }
+  cat -- "$source" > "$destination"
+}
+
+install_desktop_runtime_configs() {
+  local theme_dir="$config_home/dotfiles-theme"
+  local font_config="$config_home/dotfiles-font/font.conf"
+  local runtime_dir="$config_home/dotfiles-runtime"
+  local FONT_FAMILY
+
+  [[ -r $theme_dir/xsettingsd.conf && -r $theme_dir/dunstrc ]] || {
+    printf 'Active desktop theme configuration is incomplete.\n' >&2
+    return 1
+  }
+  [[ -r $font_config ]] || {
+    printf 'Active font configuration not found: %s\n' "$font_config" >&2
+    return 1
+  }
+  # shellcheck disable=SC1090
+  source "$font_config"
+  mkdir -p -- "$runtime_dir"
+  sed "s/^Gtk\/FontName .*/Gtk\/FontName \"$FONT_FAMILY 10\"/" \
+    "$theme_dir/xsettingsd.conf" > "$runtime_dir/xsettingsd.conf"
+  sed "s/^[[:space:]]*font = .*/    font = $FONT_FAMILY 10/" \
+    "$theme_dir/dunstrc" > "$runtime_dir/dunstrc"
 }
 
 initialize_theme_profile() {
@@ -338,6 +385,22 @@ initialize_theme_profile() {
   link_file 'themes/profiles/gruvbox' "$destination"
 }
 
+initialize_font_profile() {
+  local destination="$config_home/dotfiles-font"
+  local resolved
+
+  if [[ -L $destination ]]; then
+    resolved=$(readlink -f -- "$destination" 2>/dev/null || true)
+    case $resolved in
+      "$repo_dir/fonts/profiles/"*)
+        printf 'Active font retained: %s\n' "${resolved##*/}"
+        return 0
+        ;;
+    esac
+  fi
+  link_file 'fonts/profiles/meslo-lg' "$destination"
+}
+
 status=0
 install_papirus_icons || status=1
 install_gruvbox_papirus_icons || status=1
@@ -347,7 +410,10 @@ for entry in "${links[@]}"; do
 done
 install_gruvbox_kvantum_theme || status=1
 initialize_theme_profile || status=1
+initialize_font_profile || status=1
 install_alacritty_runtime_theme || status=1
+install_alacritty_runtime_font || status=1
+install_desktop_runtime_configs || status=1
 install_wofi_runtime_theme || status=1
 install_flameshot_runtime_theme || status=1
 

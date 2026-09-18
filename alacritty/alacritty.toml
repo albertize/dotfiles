@@ -1,13 +1,9 @@
-# This stable generated file is updated in place so Alacritty's live-reload
-# watcher notices global theme changes.
-general.import = ["theme.toml"]
+# These stable generated files are updated in place so Alacritty's live-reload
+# watcher notices global theme and font changes.
+general.import = ["theme.toml", "font.toml"]
 
 [font]
 size = 11.0
-
-[font.normal]
-family = "JetBrainsMono Nerd Font"
-style = "Regular"
 
 [window.dimensions]
 columns = 110

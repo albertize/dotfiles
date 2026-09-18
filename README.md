@@ -20,10 +20,12 @@ GTK/Qt, VS Code, the desktop and lock-screen wallpaper, and the published icon t
 together. Window borders and gaps are set to
 three logical pixels through `$border` and `$gaps` in `sway/config`. The built-in `eDP-1` display uses 125%
 scaling and is centered below the external display, which may be connected
-through either `HDMI-A-1` or `DP-3`. Waybar prefers
-the upper external display and automatically moves to the laptop panel when the
-external display is disconnected. In laptop-only mode, the panel is moved back
-to the global origin so screenshot tools receive valid capture geometry. Use
+through either `HDMI-A-1` or `DP-3`. Its position is calculated from the active
+monitor's logical size to keep the outputs contiguous and non-overlapping after
+mode changes. Waybar prefers the upper external display and automatically moves
+to the laptop panel when the external display is disconnected. In laptop-only
+mode, the panel is moved back to the global origin so screenshot tools receive
+valid capture geometry. Use
 `swaymsg -t get_outputs` to find the
 correct output names on a different machine.
 

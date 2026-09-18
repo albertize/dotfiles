@@ -14,9 +14,10 @@ set $border 3
 font pango:JetBrainsMono Nerd Font 10
 
 ### Appearance
-# Center the laptop display below the unscaled external monitor. The laptop's
-# 1920x1200 panel is 1536 logical pixels wide at 125% scaling.
-# Both external connectors used on this machine are configured identically.
+# Initial layout for the usual 1920x1080 external mode. output-manager.sh
+# recalculates the laptop position from the active monitor's logical rectangle
+# so mode changes cannot create overlapping outputs. The laptop's 1920x1200
+# panel is 1536 logical pixels wide at 125% scaling.
 output HDMI-A-1 {
     position 0 0
     scale 1

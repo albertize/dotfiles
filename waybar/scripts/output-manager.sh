@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Keep one Waybar instance on the preferred external output and maintain valid
-# output coordinates when the external monitor is connected or disconnected.
+# Keep one Waybar instance on the preferred external output and maintain a
+# contiguous, non-overlapping output layout when monitors change.
 set -u
 
 # Preferred external connectors, in priority order.
@@ -69,14 +69,36 @@ active_external_output() {
 }
 
 arrange_outputs() {
-  local outputs external desired_x desired_y current_position
+  local outputs external external_geometry internal_geometry
+  local external_x external_y external_width external_height
+  local current_x current_y internal_width horizontal_offset desired_x desired_y
 
   outputs=$(swaymsg -r -t get_outputs)
   external=$(active_external_output "$outputs")
+  internal_geometry=$(jq -r --arg output "$internal_output" '
+    .[] | select(.active and .name == $output) |
+    [.rect.x, .rect.y, .rect.width] | @tsv
+  ' <<< "$outputs")
+  [[ -n $internal_geometry ]] || return 0
+  IFS=$'\t' read -r current_x current_y internal_width <<< "$internal_geometry"
 
   if [[ -n $external ]]; then
-    desired_x=192
-    desired_y=1080
+    external_geometry=$(jq -r --arg output "$external" '
+      .[] | select(.active and .name == $output) |
+      [.rect.x, .rect.y, .rect.width, .rect.height] | @tsv
+    ' <<< "$outputs")
+    [[ -n $external_geometry ]] || return 0
+    IFS=$'\t' read -r external_x external_y external_width external_height \
+      <<< "$external_geometry"
+
+    # Derive the position from the current logical rectangles rather than from
+    # an assumed 1920x1080 mode. A mode change would otherwise leave the
+    # outputs overlapping or separated, trapping the pointer and confusing
+    # screenshot tools.
+    horizontal_offset=$(( (external_width - internal_width) / 2 ))
+    (( horizontal_offset >= 0 )) || horizontal_offset=0
+    desired_x=$(( external_x + horizontal_offset ))
+    desired_y=$(( external_y + external_height ))
   else
     # Keep an active output at the global origin. Flameshot cannot determine
     # capture geometry reliably when a lone output retains an old offset.
@@ -84,11 +106,7 @@ arrange_outputs() {
     desired_y=0
   fi
 
-  current_position=$(jq -r --arg output "$internal_output" '
-    [.[] | select(.active and .name == $output) | .rect.x, .rect.y] | @tsv
-  ' <<< "$outputs")
-  [[ -n $current_position ]] || return 0
-  [[ $current_position == "$desired_x"$'\t'"$desired_y" ]] ||
+  [[ $current_x == "$desired_x" && $current_y == "$desired_y" ]] ||
     swaymsg -q output "$internal_output" position "$desired_x" "$desired_y"
 }
 

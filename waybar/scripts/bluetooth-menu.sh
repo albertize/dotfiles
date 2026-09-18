@@ -210,23 +210,6 @@ load_devices() {
   done < <(bt "${command[@]}" 2>/dev/null)
 }
 
-load_device_details() {
-  local address=$1
-  local info battery rssi trusted_state
-
-  info=$(bt info "$address" 2>/dev/null || true)
-  battery=$(printf '%s\n' "$info" |
-    awk -F'[()]' '/Battery Percentage:/ { print $2; exit }')
-  rssi=$(printf '%s\n' "$info" |
-    awk -F'[()]' '/^[[:space:]]*RSSI:/ { print $2; exit }')
-  trusted_state=$(printf '%s\n' "$info" |
-    awk -F': ' '/^[[:space:]]*Trusted:/ { print $2; exit }')
-
-  [[ $battery =~ ^[0-9]+$ ]] && battery_levels["$address"]=$battery
-  [[ $rssi =~ ^-?[0-9]+$ ]] && signal_levels["$address"]=$rssi
-  [[ $trusted_state == yes ]] && trusted_devices["$address"]=1
-}
-
 extract_address() {
   local entry=$1
 
@@ -237,13 +220,19 @@ extract_address() {
 
 device_menu() {
   local address=$1
-  local choice paired_state connected_state trusted_state
+  local choice info paired_state connected_state trusted_state
   local -a entries
 
   while true; do
-    paired_state=$(device_property "$address" Paired)
-    connected_state=$(device_property "$address" Connected)
-    trusted_state=$(device_property "$address" Trusted)
+    # Fetch all properties with one BlueZ request. Running one bluetoothctl
+    # process per property noticeably delayed this submenu on slow adapters.
+    info=$(bt info "$address" 2>/dev/null || true)
+    paired_state=$(printf '%s\n' "$info" |
+      awk -F': ' '/^[[:space:]]*Paired:/ { print $2; exit }')
+    connected_state=$(printf '%s\n' "$info" |
+      awk -F': ' '/^[[:space:]]*Connected:/ { print $2; exit }')
+    trusted_state=$(printf '%s\n' "$info" |
+      awk -F': ' '/^[[:space:]]*Trusted:/ { print $2; exit }')
     entries=()
 
     if [[ $connected_state == yes ]]; then
@@ -314,7 +303,6 @@ bt list 2>/dev/null | grep -q '^Controller ' || {
 
 while true; do
   declare -A aliases=() paired=() connected=() trusted_devices=()
-  declare -A battery_levels=() signal_levels=()
   entries=()
 
   if [[ $(controller_powered) != yes ]]; then
@@ -324,6 +312,7 @@ while true; do
     load_devices '' aliases
     load_devices Paired paired
     load_devices Connected connected
+    load_devices Trusted trusted_devices
 
     # A paired device can remain known even when it is absent from the general
     # discovery list, so merge both sources before creating menu entries.
@@ -332,13 +321,8 @@ while true; do
     done
 
     for address in "${!aliases[@]}"; do
-      load_device_details "$address"
       details=''
       [[ -n ${trusted_devices[$address]+x} ]] && details+=' · trusted'
-      [[ -n ${battery_levels[$address]+x} ]] &&
-        details+=" · ${battery_levels[$address]}%"
-      [[ -n ${signal_levels[$address]+x} ]] &&
-        details+=" · ${signal_levels[$address]} dBm"
 
       if [[ -n ${connected[$address]+x} ]]; then
         entries+=("${connected_prefix}${aliases[$address]} · connected${details}  [$address]")

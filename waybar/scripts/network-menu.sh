@@ -210,7 +210,7 @@ while true; do
     done < <(
       LC_ALL=C nmcli --escape yes --terse \
         --get-values ACTIVE,SSID,SIGNAL,SECURITY device wifi list \
-        ifname "$device" --rescan auto
+        ifname "$device" --rescan no
     )
 
     [[ -n $active_ssid ]] && entries+=("$disconnect_wifi")

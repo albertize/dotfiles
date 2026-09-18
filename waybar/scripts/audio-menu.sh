@@ -321,8 +321,8 @@ volume=$(printf '%s\n' "$volume_status" |
   awk 'NF >= 2 { printf "%.0f", $2 * 100 }')
 [[ -n $volume ]] || volume='--'
 
-default_output=$(LC_ALL=C pactl get-default-sink 2>/dev/null || true)
-default_input=$(LC_ALL=C pactl get-default-source 2>/dev/null || true)
+# Populate device, profile, and stream data only after the corresponding
+# action is selected. The main menu should not wait for several pactl dumps.
 declare -A node_names=() node_ports=() node_descriptions=()
 declare -A profile_cards=() profile_names=() profile_descriptions=()
 declare -A stream_ids=() stream_kinds=() stream_descriptions=()
@@ -330,11 +330,6 @@ output_entries=()
 input_entries=()
 profile_entries=()
 stream_entries=()
-load_nodes sinks Output '󰓃' "$default_output" output_entries
-load_nodes sources Input '' "$default_input" input_entries
-load_profiles
-load_streams sink-inputs Playback '󰎆'
-load_streams source-outputs Recording '󰍬'
 
 entries=(
   "$select_output"
@@ -351,10 +346,29 @@ choice=$(printf '%s\n' "${entries[@]}" |
     --width "$menu_width" --height "$menu_height") || exit 0
 
 case $choice in
-  "$select_output") choose_node Output output_entries ;;
-  "$select_input") choose_node Input input_entries ;;
-  "$select_profile") choose_profile ;;
-  "$manage_streams") manage_application_streams ;;
+  "$select_output")
+    default_output=$(LC_ALL=C pactl get-default-sink 2>/dev/null || true)
+    load_nodes sinks Output '󰓃' "$default_output" output_entries
+    choose_node Output output_entries
+    ;;
+  "$select_input")
+    default_input=$(LC_ALL=C pactl get-default-source 2>/dev/null || true)
+    load_nodes sources Input '' "$default_input" input_entries
+    choose_node Input input_entries
+    ;;
+  "$select_profile")
+    load_profiles
+    choose_profile
+    ;;
+  "$manage_streams")
+    default_output=$(LC_ALL=C pactl get-default-sink 2>/dev/null || true)
+    default_input=$(LC_ALL=C pactl get-default-source 2>/dev/null || true)
+    load_nodes sinks Output '󰓃' "$default_output" output_entries
+    load_nodes sources Input '' "$default_input" input_entries
+    load_streams sink-inputs Playback '󰎆'
+    load_streams source-outputs Recording '󰍬'
+    manage_application_streams
+    ;;
   "$volume_up") wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+ ;;
   "$volume_down") wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- ;;
   "$mute_output") wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;

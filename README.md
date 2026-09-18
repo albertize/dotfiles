@@ -211,6 +211,9 @@ It creates these managed links and runtime files:
   `xdg-desktop-portal/sway-portals.conf`
 - `${XDG_CONFIG_HOME:-~/.config}/systemd/user/dotfiles-sway-session.target` →
   `systemd/user/dotfiles-sway-session.target`
+- `~/.gtkrc-2.0` → the generated GTK 2 configuration under
+  `${XDG_CONFIG_HOME:-~/.config}/dotfiles-runtime`, synchronized with the
+  active theme and font profiles
 - `${XDG_CONFIG_HOME:-~/.config}/gtk-{3,4}.0` → `gtk-{3,4}.0/`
 - `${XDG_DATA_HOME:-~/.local/share}/color-schemes/{CatppuccinMacchiato,GruvboxDark}.colors`
   → managed KDE color schemes

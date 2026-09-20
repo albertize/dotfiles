@@ -8,11 +8,11 @@ readonly upstream_commit='9b8be4d6648ae9eaae3dd550105081f8c9054825'
 readonly sass_version='1.104.1'
 
 repo_dir=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
-destination="$repo_dir/themes/everforest-green-dark-medium"
+destination="$repo_dir/themes/everforest-green-dark"
 temporary_directory=$(mktemp -d)
 trap 'rm -rf -- "$temporary_directory"' EXIT
 source_directory="$temporary_directory/source"
-staged_theme="$temporary_directory/everforest-green-dark-medium"
+staged_theme="$temporary_directory/everforest-green-dark"
 
 for command_name in git npx; do
   command -v "$command_name" >/dev/null 2>&1 || {
@@ -26,26 +26,24 @@ git -C "$source_directory" remote add origin "$upstream_url"
 git -C "$source_directory" fetch -q --depth 1 origin "$upstream_commit"
 git -C "$source_directory" checkout -q --detach FETCH_HEAD
 
-# Build the upstream green-accented, medium-contrast dark variant used by the
+# Build the upstream green-accented, default-contrast dark variant used by the
 # desktop profile. Keep this transformation explicit so regeneration is stable.
 cp -- "$source_directory/themes/src/sass/_tweaks.scss" \
   "$source_directory/themes/src/sass/_tweaks-temp.scss"
 sed -i \
-  -e 's/color-palette-default/color-palette-medium/' \
-  -e "s/\$colorscheme: 'default'/\$colorscheme: 'medium'/" \
   -e "s/\$theme: 'default'/\$theme: 'green'/" \
   "$source_directory/themes/src/sass/_tweaks-temp.scss"
 
 mkdir -p -- "$staged_theme/gtk-3.0/assets" "$staged_theme/gtk-4.0/assets"
-cp -a -- "$source_directory/themes/src/assets/gtk/assets-Green-Medium/." \
+cp -a -- "$source_directory/themes/src/assets/gtk/assets-Green/." \
   "$staged_theme/gtk-3.0/assets/"
 cp -a -- "$source_directory/themes/src/assets/gtk/scalable" \
   "$staged_theme/gtk-3.0/assets/scalable"
 cp -a -- "$source_directory/themes/src/assets/gtk/scalable/." \
   "$staged_theme/gtk-4.0/assets/"
-cp -a -- "$source_directory/themes/src/assets/gtk/thumbnails/thumbnail-Green-Medium-Dark.png" \
+cp -a -- "$source_directory/themes/src/assets/gtk/thumbnails/thumbnail-Green-Dark.png" \
   "$staged_theme/gtk-3.0/thumbnail.png"
-cp -a -- "$source_directory/themes/src/assets/gtk/thumbnails/thumbnail-Green-Medium-Dark.png" \
+cp -a -- "$source_directory/themes/src/assets/gtk/thumbnails/thumbnail-Green-Dark.png" \
   "$staged_theme/gtk-4.0/thumbnail.png"
 
 for gtk_version in 3.0 4.0; do
@@ -68,13 +66,13 @@ done
 cat > "$staged_theme/index.theme" <<'EOF'
 [Desktop Entry]
 Type=X-GNOME-Metatheme
-Name=Everforest-Green-Dark-Medium
-Comment=Complete Everforest green dark medium GTK theme
+Name=Everforest-Green-Dark
+Comment=Complete Everforest green dark GTK theme
 Encoding=UTF-8
 
 [X-GNOME-Metatheme]
-GtkTheme=Everforest-Green-Dark-Medium
-MetacityTheme=Everforest-Green-Dark-Medium
+GtkTheme=Everforest-Green-Dark
+MetacityTheme=Everforest-Green-Dark
 IconTheme=Papirus-Dark-Everforest
 CursorTheme=Adwaita
 ButtonLayout=icon:minimize,maximize,close

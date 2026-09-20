@@ -10,6 +10,8 @@ fonts_dir="$repo_dir/fonts/profiles"
 config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
 active_theme="$config_home/dotfiles-theme"
 active_font="$config_home/dotfiles-font"
+runtime_dir=${XDG_RUNTIME_DIR:-"/tmp/dotfiles-$UID"}
+appearance_style="$runtime_dir/dotfiles-appearance-menu.css"
 
 usage() {
   printf 'Usage: %s [--list | THEME | --list-fonts | --font FONT]\n' "${0##*/}"
@@ -59,10 +61,47 @@ canonical_font_name() {
 
 menu_height() {
   local count=$1
-  local height=$(( count * 34 + 34 ))
-  (( height < 96 )) && height=96
+  local height=$(( count * 42 + 58 ))
+  (( height < 142 )) && height=142
   (( height > 520 )) && height=520
   printf '%s\n' "$height"
+}
+
+prepare_appearance_style() {
+  local source_style="$config_home/wofi/theme.css"
+  local temporary_style
+
+  [[ -r $source_style ]] || {
+    printf 'Wofi theme not found: %s\n' "$source_style" >&2
+    return 1
+  }
+  mkdir -p -- "$runtime_dir"
+  temporary_style=$(mktemp "$runtime_dir/.appearance-menu.XXXXXX")
+  cat -- "$source_style" > "$temporary_style"
+  cat >> "$temporary_style" <<'EOF'
+
+/* Compact layout specific to the appearance selector. */
+#outer-box {
+  margin: 8px;
+}
+
+#input {
+  min-height: 28px;
+  margin-bottom: 10px;
+  padding: 0 10px;
+}
+
+#entry {
+  min-height: 34px;
+  margin: 4px 0;
+  padding: 0 12px;
+}
+
+#text {
+  padding: 0 2px;
+}
+EOF
+  mv -f -- "$temporary_style" "$appearance_style"
 }
 
 select_category_menu() {
@@ -84,11 +123,11 @@ select_category_menu() {
     source "$font_config"
   fi
 
-  theme_line=$(printf '<b>Themes</b>  %s' "$DISPLAY_NAME")
-  font_line=$(printf '<b>Fonts</b>     %s' "$FONT_DISPLAY_NAME")
+  theme_line=$(printf '󰏘  <b>%-9s</b>  %s  ' 'Theme' "$DISPLAY_NAME")
+  font_line=$(printf '  <b>%-9s</b>  %s  ' 'Font' "$FONT_DISPLAY_NAME")
   selection=$(printf '%s\n' "$theme_line" "$font_line" | wofi --dmenu \
-    --allow-markup --hide-search --cache-file /dev/null --prompt Appearance \
-    --width 520 --height 96 --location center) || return 1
+    --allow-markup --hide-search --cache-file /dev/null --prompt '󰏘  Appearance' \
+    --style "$appearance_style" --width 680 --height 124 --location center) || return 1
   [[ -n $selection ]] || return 1
 
   case $selection in
@@ -97,8 +136,8 @@ select_category_menu() {
   esac
   plain_selection=$(sed 's/<[^>]*>//g' <<< "$selection")
   case $plain_selection in
-    Themes*) printf 'themes\n' ;;
-    Fonts*) printf 'fonts\n' ;;
+    *Theme*) printf 'themes\n' ;;
+    *Font*) printf 'fonts\n' ;;
     *) printf 'Could not identify selected appearance category.\n' >&2; return 1 ;;
   esac
 }
@@ -121,16 +160,16 @@ select_theme_menu() {
       return 1
     }
 
-    line=$(printf '<b>%-24s</b>' "$DISPLAY_NAME")
+    line=$(printf '󰏘  <b>%-22s</b>  ' "$DISPLAY_NAME")
     for color in "${colors[@]}"; do
       [[ $color =~ ^#[0-9A-Fa-f]{6}$ ]] || {
         printf 'Invalid preview color in theme %s: %s\n' \
           "${profile##*/}" "$color" >&2
         return 1
       }
-      line+="<span foreground=\"$color\">■■</span>"
+      line+="<span foreground=\"$color\">●</span> "
     done
-    [[ ${profile##*/} == "$current_theme" ]] && line+='  active'
+    [[ ${profile##*/} == "$current_theme" ]] && line+='  '
     menu_lines+=("$line")
     menu_profiles+=("${profile##*/}")
   done
@@ -140,8 +179,9 @@ select_theme_menu() {
   done
   height=$(menu_height "${#menu_lines[@]}")
   selection=$(printf '%s\n' "${menu_lines[@]}" | wofi --dmenu \
-    --allow-markup --cache-file /dev/null --prompt Themes \
-    --width 560 --height "$height" --location center) || return 1
+    --allow-markup --cache-file /dev/null --prompt '󰏘  Select theme' \
+    --style "$appearance_style" --width 620 --height "$height" \
+    --location center) || return 1
   [[ -n $selection ]] || return 1
   plain_selection=$(sed 's/<[^>]*>//g' <<< "$selection")
 
@@ -168,8 +208,8 @@ select_font_menu() {
     FONT_FAMILY=''
     # shellcheck disable=SC1090
     source "$profile/font.conf"
-    line=$(printf '<b>%-34s</b>  %s' "$FONT_DISPLAY_NAME" "$FONT_FAMILY")
-    [[ ${profile##*/} == "$current_font" ]] && line+='  active'
+    line=$(printf '  <b>%-30s</b>  %s' "$FONT_DISPLAY_NAME" "$FONT_FAMILY")
+    [[ ${profile##*/} == "$current_font" ]] && line+='  '
     menu_lines+=("$line")
     menu_profiles+=("${profile##*/}")
   done
@@ -179,8 +219,9 @@ select_font_menu() {
   done
   height=$(menu_height "${#menu_lines[@]}")
   selection=$(printf '%s\n' "${menu_lines[@]}" | wofi --dmenu \
-    --allow-markup --cache-file /dev/null --prompt Fonts \
-    --width 620 --height "$height" --location center) || return 1
+    --allow-markup --cache-file /dev/null --prompt '  Select font' \
+    --style "$appearance_style" --width 720 --height "$height" \
+    --location center) || return 1
   [[ -n $selection ]] || return 1
   plain_selection=$(sed 's/<[^>]*>//g' <<< "$selection")
 
@@ -236,6 +277,7 @@ case $# in
       usage >&2
       exit 1
     }
+    prepare_appearance_style
     category=$(select_category_menu) || exit 0
     case $category in
       themes)

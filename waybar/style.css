@@ -19,6 +19,11 @@ window#waybar {
   background: transparent;
 }
 
+#custom-bar-transparency {
+  padding: 0;
+  background: transparent;
+}
+
 #custom-launcher {
   min-width: 18px;
   padding: 0 5px;
@@ -195,4 +200,19 @@ tooltip label {
 
 @keyframes blink {
   to { color: @base; background: @text; }
+}
+
+/* The expanding side modules toggle this class through the generated runtime
+ * configuration, leaving module-specific click actions untouched. */
+window#waybar.transparent,
+window#waybar.transparent .modules-left *,
+window#waybar.transparent .modules-center *,
+window#waybar.transparent .modules-right * {
+  color: @bar-transparent-text;
+  background-color: transparent;
+  animation: none;
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+  text-shadow: none;
 }

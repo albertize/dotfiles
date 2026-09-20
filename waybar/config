@@ -3,14 +3,16 @@
   "position": "top",
   "height": 24,
   "spacing": 3,
+  "expand-left": true,
+  "expand-right": true,
   "margin-top": 0,
   "margin-bottom": 0,
   "margin-left": 0,
   "margin-right": 0,
 
-  "modules-left": ["custom/launcher", "sway/workspaces", "sway/mode"],
+  "modules-left": ["custom/launcher", "sway/workspaces", "sway/mode", "custom/bar-transparency#left"],
   "modules-center": ["clock"],
-  "modules-right": ["idle_inhibitor", "custom/notifications", "custom/bluetooth", "pulseaudio", "network", "custom/vpn", "cpu", "memory", "battery", "tray", "custom/theme", "custom/clipboard", "custom/power"],
+  "modules-right": ["custom/bar-transparency#right", "idle_inhibitor", "custom/notifications", "custom/bluetooth", "pulseaudio", "network", "custom/vpn", "cpu", "memory", "battery", "tray", "custom/theme", "custom/clipboard", "custom/power"],
 
   "custom/launcher": {
     "format": "",
@@ -25,6 +27,18 @@
   },
   "sway/mode": {
     "format": "<span style=\"italic\">{}</span>"
+  },
+  "custom/bar-transparency#left": {
+    "format": " ",
+    "expand": true,
+    "tooltip": false,
+    "on-click": "~/.config/waybar/scripts/bar-transparency.sh"
+  },
+  "custom/bar-transparency#right": {
+    "format": " ",
+    "expand": true,
+    "tooltip": false,
+    "on-click": "~/.config/waybar/scripts/bar-transparency.sh"
   },
   "clock": {
     "interval": 1,

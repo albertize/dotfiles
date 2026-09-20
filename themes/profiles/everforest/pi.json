@@ -10,11 +10,11 @@
     "text": "#d3c6aa",
     "gray": "#9da9a0",
     "dimGray": "#7a8478",
-    "darkGray": "#475258",
+    "darkGray": "#414b50",
     "accent": "#d699b6",
-    "selectedBg": "#475258",
-    "userMsgBg": "#343f44",
-    "toolPendingBg": "#2d353b",
+    "selectedBg": "#414b50",
+    "userMsgBg": "#2e383c",
+    "toolPendingBg": "#272e33",
     "toolSuccessBg": "#35463c",
     "toolErrorBg": "#4b383b",
     "customMsgBg": "#463a46"
@@ -69,7 +69,7 @@
     "syntaxOperator": "#83c092",
     "syntaxPunctuation": "#859289",
     "thinkingOff": "darkGray",
-    "thinkingMinimal": "#56635f",
+    "thinkingMinimal": "#4f5b58",
     "thinkingLow": "#7fbbb3",
     "thinkingMedium": "#83c092",
     "thinkingHigh": "#d699b6",
@@ -78,8 +78,8 @@
     "bashMode": "green"
   },
   "export": {
-    "pageBg": "#1e2326",
-    "cardBg": "#232a2e",
-    "infoBg": "#343f44"
+    "pageBg": "#171e1f",
+    "cardBg": "#1e2326",
+    "infoBg": "#2e383c"
   }
 }

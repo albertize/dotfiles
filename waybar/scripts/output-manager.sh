@@ -18,8 +18,10 @@ readonly font_style="$config_home/dotfiles-font/font.css"
 readonly runtime_config="$runtime_dir/waybar-output.json"
 readonly runtime_style="$runtime_dir/waybar-style.css"
 readonly manager_pid_file="$runtime_dir/waybar-output-manager.pid"
+readonly bar_pid_file="$runtime_dir/waybar.pid"
 readonly state_home=${XDG_STATE_HOME:-"$HOME/.local/state"}
 readonly idle_inhibitor_state="$state_home/dotfiles/idle-inhibitor"
+readonly transparency_state="$state_home/dotfiles/waybar-transparent"
 
 bar_pid=''
 events_pid=''
@@ -44,6 +46,9 @@ cleanup() {
   [[ -n $events_pid ]] && kill "$events_pid" 2>/dev/null || true
   [[ -n $bar_pid ]] && wait "$bar_pid" 2>/dev/null || true
   [[ -n $events_pid ]] && wait "$events_pid" 2>/dev/null || true
+  if [[ -r $bar_pid_file ]] && [[ $(<"$bar_pid_file") == "${bar_pid:-}" ]]; then
+    rm -f -- "$bar_pid_file"
+  fi
   if [[ -r $manager_pid_file ]] && [[ $(<"$manager_pid_file") == "$$" ]]; then
     rm -f -- "$manager_pid_file"
   fi
@@ -178,6 +183,9 @@ stop_bar() {
   if [[ -n $bar_pid ]]; then
     kill "$bar_pid" 2>/dev/null || true
     wait "$bar_pid" 2>/dev/null || true
+    if [[ -r $bar_pid_file ]] && [[ $(<"$bar_pid_file") == "$bar_pid" ]]; then
+      rm -f -- "$bar_pid_file"
+    fi
     bar_pid=''
   fi
 }
@@ -187,17 +195,24 @@ start_bar() {
   local temporary_config="$runtime_config.tmp"
   local temporary_style="$runtime_style.tmp"
   local idle_inhibitor_activated=false
+  local bar_name=opaque
 
   if [[ -r $idle_inhibitor_state ]] &&
       [[ $(<"$idle_inhibitor_state") == activated ]]; then
     idle_inhibitor_activated=true
   fi
+  if [[ -r $transparency_state ]] &&
+      [[ $(<"$transparency_state") == true ]]; then
+    bar_name=transparent
+  fi
 
   mkdir -p -- "$runtime_dir"
   sed -f "$theme_config_filter" "$source_config" |
     jq --arg output "$output" \
+      --arg name "$bar_name" \
       --argjson idle_inhibitor_activated "$idle_inhibitor_activated" '
         .output = [$output]
+        | .name = $name
         | .idle_inhibitor["start-activated"] = $idle_inhibitor_activated
       ' > "$temporary_config"
   cat -- "$theme_style" "$base_style" "$font_style" > "$temporary_style"
@@ -205,6 +220,7 @@ start_bar() {
   mv -- "$temporary_style" "$runtime_style"
   waybar --config "$runtime_config" --style "$runtime_style" &
   bar_pid=$!
+  printf '%s\n' "$bar_pid" > "$bar_pid_file"
 }
 
 refresh_bar() {

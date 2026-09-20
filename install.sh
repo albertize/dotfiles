@@ -30,7 +30,7 @@ links=(
   "environment.d/90-wayland-toolkits.conf|$config_home/environment.d/90-wayland-toolkits.conf"
   "themes/catppuccin-macchiato-blue-standard+default|$data_home/themes/catppuccin-macchiato-blue-standard+default"
   "themes/gruvbox-dark|$data_home/themes/Gruvbox-Dark"
-  "themes/everforest-green-dark-medium|$data_home/themes/Everforest-Green-Dark-Medium"
+  "themes/everforest-green-dark|$data_home/themes/Everforest-Green-Dark"
   "media|$data_home/backgrounds/dotfiles"
 )
 
@@ -274,6 +274,13 @@ remove_legacy_theme_links() {
     rm -f -- "$destination"
     printf 'Removed obsolete theme-specific link: %s\n' "$destination"
   fi
+
+  destination="$data_home/themes/Everforest-Green-Dark-Medium"
+  if [[ -L $destination ]] &&
+     [[ $(readlink -- "$destination") == "$repo_dir/themes/everforest-green-dark-medium" ]]; then
+    rm -f -- "$destination"
+    printf 'Removed obsolete Everforest GTK theme link: %s\n' "$destination"
+  fi
 }
 
 install_gruvbox_kvantum_theme() {
@@ -327,7 +334,7 @@ install_gruvbox_kvantum_theme() {
 install_everforest_kvantum_theme() {
   local directory="$config_home/Kvantum/everforest-dark"
   local marker="$directory/.dotfiles-version"
-  local version='catppuccin-kvantum-71105d2-everforest-v1'
+  local version='catppuccin-kvantum-71105d2-everforest-hard-v2'
   local source="$repo_dir/Kvantum/catppuccin-macchiato-blue"
   local answer
 
@@ -348,9 +355,9 @@ install_everforest_kvantum_theme() {
   mkdir -p -- "$directory"
   sed \
     -e 's/Catppuccin-Macchiato-Blue/Everforest-Dark/g' \
-    -e 's/#24273A/#2D353B/g' -e 's/#1E2030/#232A2E/g' \
-    -e 's/#363A4F/#343F44/g' -e 's/#494D64/#3D484D/g' \
-    -e 's/#5B6078/#475258/g' -e 's/#6E738D/#56635F/g' \
+    -e 's/#24273A/#272E33/g' -e 's/#1E2030/#1E2326/g' \
+    -e 's/#363A4F/#2E383C/g' -e 's/#494D64/#374145/g' \
+    -e 's/#5B6078/#414B50/g' -e 's/#6E738D/#4F5B58/g' \
     -e 's/#939AB7/#859289/g' -e 's/#A5ADCB/#9DA9A0/g' \
     -e 's/#CAD3F5/#D3C6AA/g' -e 's/#8AADF4/#A7C080/g' \
     -e 's/#809FE1/#829267/g' -e 's/#96B4F4/#83C092/g' \
@@ -358,9 +365,9 @@ install_everforest_kvantum_theme() {
     "$source/catppuccin-macchiato-blue.kvconfig" \
     > "$directory/everforest-dark.kvconfig"
   sed \
-    -e 's/#24273A/#2D353B/g' -e 's/#1E2030/#232A2E/g' \
-    -e 's/#363A4F/#343F44/g' -e 's/#494D64/#3D484D/g' \
-    -e 's/#5B6078/#475258/g' -e 's/#6E738D/#56635F/g' \
+    -e 's/#24273A/#272E33/g' -e 's/#1E2030/#1E2326/g' \
+    -e 's/#363A4F/#2E383C/g' -e 's/#494D64/#374145/g' \
+    -e 's/#5B6078/#414B50/g' -e 's/#6E738D/#4F5B58/g' \
     -e 's/#939AB7/#859289/g' -e 's/#A5ADCB/#9DA9A0/g' \
     -e 's/#CAD3F5/#D3C6AA/g' -e 's/#8AADF4/#A7C080/g' \
     -e 's/#809FE1/#829267/g' -e 's/#96B4F4/#83C092/g' \

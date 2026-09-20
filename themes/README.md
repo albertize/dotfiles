@@ -5,8 +5,8 @@ contains Sway, Waybar, Wofi, Swaylock, Alacritty, tmux, Neovim, Pi, Dunst,
 Flameshot, VS Code, toolkit, icon, and wallpaper settings. `gruvbox` uses the
 canonical [Gruvbox](https://github.com/morhetz/gruvbox) dark palette and the
 Papirus brown folder colors; `catppuccin-macchiato` preserves the previous
-configuration; and `everforest` uses Everforest Dark Medium with a green
-accent and green Papirus folders.
+configuration; and `everforest` uses the default-contrast Everforest Dark
+palette with a green accent and green Papirus folders.
 
 Each profile's `vscode.json` is consumed by the local extension in
 `vscode/dotfiles-theme`. The installer installs
@@ -25,8 +25,8 @@ extension is required.
   the script pins Dart Sass and stores the upstream license with the theme.
 - `catppuccin-macchiato-blue-standard+default`: Catppuccin GTK v1.0.3,
   downloaded from the [official release](https://github.com/catppuccin/gtk/releases/tag/v1.0.3).
-- `everforest-green-dark-medium`: the green-accented, medium-contrast dark GTK
-  3/4 theme generated from
+- `everforest-green-dark`: the green-accented, default-contrast dark GTK 3/4
+  theme generated from
   [Fausto-Korpsvart/Everforest-GTK-Theme](https://github.com/Fausto-Korpsvart/Everforest-GTK-Theme)
   at commit `9b8be4d6648ae9eaae3dd550105081f8c9054825` (GPL-3.0). Regenerate it with
   `scripts/update-everforest-gtk-theme.sh`; the script pins Dart Sass and keeps

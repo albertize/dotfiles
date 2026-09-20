@@ -91,7 +91,9 @@ pickers adopt the active theme.
   profiles are added.
 - Waybar renders workspace names without a background. The focused workspace
   uses the same strong foreground color as the Sway application-launcher icon,
-  while the others remain compact and dimmed.
+  while the others remain compact and dimmed. Clicking either empty area around
+  the centered clock toggles a fully transparent bar with light text; clicking
+  it again restores the active theme's background and foreground colors.
 - `Mod+l` locks the session manually; `Mod+Right` moves focus to the right.
 - Automatic locking is disabled; idle displays turn off after ten minutes.
 - The active profile's vendored wallpaper is applied to every output and to
@@ -133,7 +135,7 @@ pickers adopt the active theme.
   trusted, connected, battery, and signal details when BlueZ provides them.
   An event-driven monitor refreshes connection state immediately instead of
   waiting for a polling interval. Bluetooth power, notification pause,
-  and idle-inhibitor choices are stored under
+  idle-inhibitor, and Waybar transparency choices are stored under
   `${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles` and restored after Sway,
   Dunst, or Waybar restarts.
 
@@ -239,7 +241,7 @@ It creates these managed links and runtime files:
   → the vendored GTK theme
 - `${XDG_DATA_HOME:-~/.local/share}/themes/Gruvbox-Dark` → the maintained
   Gruvbox GTK theme
-- `${XDG_DATA_HOME:-~/.local/share}/themes/Everforest-Green-Dark-Medium` → the
+- `${XDG_DATA_HOME:-~/.local/share}/themes/Everforest-Green-Dark` → the
   maintained Everforest GTK theme
 - `${XDG_DATA_HOME:-~/.local/share}/backgrounds/dotfiles` → `media/`
 

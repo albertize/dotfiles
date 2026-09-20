@@ -1,0 +1,29 @@
+{
+  "name": "dotfiles-theme",
+  "displayName": "Dotfiles Theme",
+  "description": "Repository-managed color theme synchronized with the active dotfiles profile.",
+  "version": "1.0.1",
+  "publisher": "dotfiles",
+  "license": "MIT",
+  "engines": {
+    "vscode": ">=1.80.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "files": [
+    "themes/dotfiles-color-theme.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Dotfiles",
+        "uiTheme": "vs-dark",
+        "path": "./themes/dotfiles-color-theme.json",
+        "_watch": true
+      }
+    ]
+  }
+}

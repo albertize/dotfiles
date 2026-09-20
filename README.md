@@ -12,12 +12,13 @@ Personal configuration files for:
 - [Dunst](dunst), [Flameshot](flameshot), and a password-authenticated tty1 login
 - [GTK 3/4](gtk-3.0), [Qt 5/6](Kvantum), and optional VS Code synchronization
 
-The desktop has switchable Gruvbox Dark and Catppuccin Macchiato profiles.
-Gruvbox is selected on the first installation and uses brown Papirus folders;
-Catppuccin uses its Blue accent and violet Papirus folders. A profile changes
-Sway, Waybar, Wofi, Alacritty, tmux, Neovim, Pi, Dunst, Flameshot, Swaylock,
-GTK/Qt, VS Code, the desktop and lock-screen wallpaper, and the published icon theme
-together. Window borders and gaps are set to
+The desktop has switchable Gruvbox Dark, Catppuccin Macchiato, and Everforest
+Dark Medium profiles. Gruvbox is selected on the first installation and uses
+brown Papirus folders; Catppuccin uses its Blue accent and violet Papirus
+folders; Everforest uses a green accent and green Papirus folders. A profile
+changes Sway, Waybar, Wofi, Alacritty, tmux, Neovim, Pi, Dunst, Flameshot,
+Swaylock, GTK/Qt, VS Code, the desktop and lock-screen wallpaper, and the
+published icon theme together. Window borders and gaps are set to
 three logical pixels through `$border` and `$gaps` in `sway/config`. The built-in `eDP-1` display uses 125%
 scaling and is centered below the external display, which may be connected
 through either `HDMI-A-1` or `DP-3`. Its position is calculated from the active
@@ -44,29 +45,31 @@ correct output names on a different machine.
 - MesloLGS and JetBrainsMono Nerd Fonts for selectable text and icons
 - Kvantum and GTK 3 platform-theme plugins for Qt 5 and Qt 6
 - The Adwaita cursor theme and `xsettingsd`
-- Optionally, VS Code; `jdinhlife.gruvbox` and `catppuccin.catppuccin-vsc`
-  enable matching editor-theme synchronization
+- Optionally, VS Code, Code Insiders, or VSCodium; no Marketplace color-theme
+  extension is required
 
-The official Catppuccin GTK and Kvantum themes and the Papirus-Dark icon theme
-are vendored in this repository. The installer links the toolkit themes,
-extracts the pinned Papirus archive into `XDG_DATA_HOME/icons`, and builds a
-small inheriting Papirus theme with the official brown folder palette for
-Gruvbox. The repository also provides a complete Gruvbox GTK theme and
-builds a matching Kvantum palette from the pinned Catppuccin engine assets.
-Managed KDE color schemes keep Qt/KDE application palettes synchronized with
-Kvantum. Sway passes
-the selected theme variables to new applications explicitly, while the theme
-application script publishes them to the systemd and D-Bus user environments. A managed systemd user target registers Sway as a graphical
-session so portal-based screenshots work even when Sway is started manually.
+The Catppuccin, Gruvbox, and Everforest GTK themes, the Catppuccin Kvantum
+engine assets, and the Papirus-Dark icon theme are vendored in this repository.
+The installer links the toolkit themes,
+extracts the pinned Papirus archive into `XDG_DATA_HOME/icons`, and builds
+small inheriting variants with brown folders for Gruvbox and green folders for
+Everforest. The repository also provides complete Gruvbox and Everforest GTK
+themes and builds matching Kvantum palettes from the pinned Catppuccin engine
+assets. Managed KDE color schemes keep Qt/KDE application palettes
+synchronized with Kvantum. Sway passes the selected theme variables to new
+applications explicitly, while the theme application script publishes them to
+the systemd and D-Bus user environments. A managed systemd user target
+registers Sway as a graphical session so portal-based screenshots work even
+when Sway is started manually.
 See [`themes/README.md`](themes/README.md) for versions, upstream sources, and
 licenses.
 The selected dark theme, Papirus icons, Adwaita cursor, selected Nerd Font,
 DPI, and antialiasing values are published through GSettings and XSettings so
 applications do not need application-specific overrides. The theme application
 script also updates the color scheme, accent, widget style, icon, and font keys
-in `kdeglobals` for KDE applications such as Gwenview and Dolphin. Detected
-VS Code installations receive the selected font for both the editor and
-integrated terminal. It republishes
+in `kdeglobals` for KDE applications such as Gwenview and Dolphin. Detected VS
+Code installations receive the selected font and the local `Dotfiles` color
+theme for both the workbench and editor. It republishes
 the toolkit environment and restarts the GTK portal backend so Electron file
 pickers adopt the active theme.
 
@@ -93,7 +96,7 @@ pickers adopt the active theme.
 - Automatic locking is disabled; idle displays turn off after ten minutes.
 - The active profile's vendored wallpaper is applied to every output and to
   Swaylock with `fill` scaling. Gruvbox uses
-  `media/luca-bravo-zAjdgNXsMeg.jpg`.
+  `media/luca-bravo-zAjdgNXsMeg.jpg`; Everforest uses `media/3114699.jpg`.
 - New windows use an automatic Fibonacci layout with equal nested splits:
   two windows are side by side, then the right half is split vertically, and
   subsequent splits continue alternating.
@@ -161,6 +164,7 @@ retains command-line operations for automation:
 ```sh
 ~/.config/sway/scripts/theme-switcher.sh --list
 ~/.config/sway/scripts/theme-switcher.sh gruvbox
+~/.config/sway/scripts/theme-switcher.sh everforest
 ~/.config/sway/scripts/theme-switcher.sh --list-fonts
 ~/.config/sway/scripts/theme-switcher.sh --font meslo-lg
 ```
@@ -174,8 +178,10 @@ The active profile is stored as the replaceable
 so the wallpaper and running desktop components update immediately. Running
 tmux and Pi sessions are refreshed as well, Neovim reloads its palette when it
 regains focus, and VS Code applies the selected editor and terminal font plus
-any matching installed theme extension live. Other existing GUI applications
-may need to be restarted.
+the repository-managed `Dotfiles` theme live. A VS Code window that was open
+while the local extension was installed may need `Developer: Reload Window`
+once; subsequent profile changes update the registered theme directly. Other
+existing GUI applications may need to be restarted.
 
 The installer asks before replacing an existing `~/.bash_profile`. Its managed
 profile retains the standard `~/.bashrc` loading behavior and starts Sway only
@@ -215,21 +221,26 @@ It creates these managed links and runtime files:
   `${XDG_CONFIG_HOME:-~/.config}/dotfiles-runtime`, synchronized with the
   active theme and font profiles
 - `${XDG_CONFIG_HOME:-~/.config}/gtk-{3,4}.0` → `gtk-{3,4}.0/`
-- `${XDG_DATA_HOME:-~/.local/share}/color-schemes/{CatppuccinMacchiato,GruvboxDark}.colors`
-  → managed KDE color schemes
+- `${XDG_DATA_HOME:-~/.local/share}/color-schemes/` receives the managed
+  `CatppuccinMacchiato`, `GruvboxDark`, and `EverforestDark` color schemes
 - `${XDG_CONFIG_HOME:-~/.config}/Kvantum/catppuccin-macchiato-blue` → the
-  vendored Kvantum theme; the adjacent Gruvbox variant is generated by the
-  installer
+  vendored Kvantum theme; adjacent Gruvbox and Everforest variants are generated
+  by the installer
 - `${XDG_CONFIG_HOME:-~/.config}/environment.d/90-wayland-toolkits.conf` →
   `environment.d/90-wayland-toolkits.conf`
 - `${XDG_CONFIG_HOME:-~/.config}/dotfiles-theme` → the active profile under
   `themes/profiles/`
 - `${XDG_CONFIG_HOME:-~/.config}/dotfiles-font` → the active profile under
   `fonts/profiles/`
+- detected VS Code installations receive a managed `dotfiles.dotfiles-theme`
+  extension under their standard per-user extension directory; its runtime
+  color theme is copied from the active profile's `vscode.json`
 - `${XDG_DATA_HOME:-~/.local/share}/themes/catppuccin-macchiato-blue-standard+default`
   → the vendored GTK theme
 - `${XDG_DATA_HOME:-~/.local/share}/themes/Gruvbox-Dark` → the maintained
   Gruvbox GTK theme
+- `${XDG_DATA_HOME:-~/.local/share}/themes/Everforest-Green-Dark-Medium` → the
+  maintained Everforest GTK theme
 - `${XDG_DATA_HOME:-~/.local/share}/backgrounds/dotfiles` → `media/`
 
 If a destination already exists, the installer asks for confirmation before

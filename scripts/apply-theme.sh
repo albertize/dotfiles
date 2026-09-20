@@ -38,7 +38,7 @@ profile="$repo_dir/themes/profiles/$theme"
 }
 required_files=(
   alacritty.toml dunstrc nvim.lua pi.json sway.conf swaylock.conf tmux.conf
-  flameshot.ini waybar.css waybar.sed wofi.css xsettingsd.conf
+  flameshot.ini vscode.json waybar.css waybar.sed wofi.css xsettingsd.conf
 )
 for required in "${required_files[@]}"; do
   [[ -r $profile/$required ]] || {
@@ -74,8 +74,7 @@ source "$font_profile/font.conf"
 : "${DISPLAY_NAME:?}" "${GTK_THEME:?}" "${GSETTINGS_ACCENT:?}" \
   "${ICON_THEME:?}" "${QT_STYLE_OVERRIDE+x}" "${KVANTUM_THEME+x}" \
   "${KDE_COLOR_SCHEME:?}" "${KDE_ACCENT:?}" "${PREVIEW_COLORS:?}" \
-  "${VSCODE_EXTENSION:?}" "${VSCODE_THEME:?}" "${WALLPAPER:?}" \
-  "${FONT_DISPLAY_NAME:?}" "${FONT_FAMILY:?}"
+  "${WALLPAPER:?}" "${FONT_DISPLAY_NAME:?}" "${FONT_FAMILY:?}"
 data_home=${XDG_DATA_HOME:-"$HOME/.local/share"}
 wallpaper="$data_home/backgrounds/dotfiles/$WALLPAPER"
 [[ -r $wallpaper ]] || {
@@ -173,29 +172,33 @@ else
   printf '{\n  "theme": "dotfiles"\n}\n' > "$pi_settings"
 fi
 
-# VS Code reloads appearance settings when its settings file changes. Fonts
-# apply to every detected installation; themes require their matching extension.
+# Each detected VS Code installation gets the same local extension identifier.
+# Updating its stable theme file and settings makes running windows adopt the
+# active profile without depending on a Marketplace color-theme extension.
 vscode_installations=(
-  'code|Code'
-  'code-insiders|Code - Insiders'
-  'codium|VSCodium'
+  'code|Code|.vscode'
+  'code-insiders|Code - Insiders|.vscode-insiders'
+  'codium|VSCodium|.vscode-oss'
 )
 for installation in "${vscode_installations[@]}"; do
-  vscode_command=${installation%%|*}
-  vscode_config=${installation#*|}
+  IFS='|' read -r vscode_command vscode_config vscode_data <<< "$installation"
   command -v "$vscode_command" >/dev/null 2>&1 || continue
   command -v python3 >/dev/null 2>&1 || {
     printf 'python3 is required to synchronize VS Code appearance.\n' >&2
     exit 1
   }
-  vscode_theme=()
-  if "$vscode_command" --list-extensions 2>/dev/null |
-     grep -Fqix "$VSCODE_EXTENSION"; then
-    vscode_theme=("$VSCODE_THEME")
+  vscode_extension="$HOME/$vscode_data/extensions/dotfiles.dotfiles-theme-1.0.1"
+  vscode_theme_file="$vscode_extension/themes/dotfiles-color-theme.json"
+  if [[ ! -r $vscode_extension/package.json || ! -e $vscode_extension/.dotfiles-managed ]] ||
+     ! "$vscode_command" --list-extensions 2>/dev/null |
+       grep -Fqix 'dotfiles.dotfiles-theme'; then
+    printf 'Dotfiles theme extension is not registered for %s.\n' "$vscode_command" >&2
+    printf 'Run install.sh before applying this profile.\n' >&2
+    exit 1
   fi
+  cat -- "$profile/vscode.json" > "$vscode_theme_file"
   "$repo_dir/scripts/update-vscode-settings.py" \
-    "$config_home/$vscode_config/User/settings.json" "$FONT_FAMILY" \
-    "${vscode_theme[@]}"
+    "$config_home/$vscode_config/User/settings.json" "$FONT_FAMILY" 'Dotfiles'
 done
 
 if command -v gsettings >/dev/null 2>&1 &&

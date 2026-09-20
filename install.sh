@@ -26,9 +26,11 @@ links=(
   "Kvantum/catppuccin-macchiato-blue|$config_home/Kvantum/catppuccin-macchiato-blue"
   "KDE/color-schemes/CatppuccinMacchiato.colors|$data_home/color-schemes/CatppuccinMacchiato.colors"
   "KDE/color-schemes/GruvboxDark.colors|$data_home/color-schemes/GruvboxDark.colors"
+  "KDE/color-schemes/EverforestDark.colors|$data_home/color-schemes/EverforestDark.colors"
   "environment.d/90-wayland-toolkits.conf|$config_home/environment.d/90-wayland-toolkits.conf"
   "themes/catppuccin-macchiato-blue-standard+default|$data_home/themes/catppuccin-macchiato-blue-standard+default"
   "themes/gruvbox-dark|$data_home/themes/Gruvbox-Dark"
+  "themes/everforest-green-dark-medium|$data_home/themes/Everforest-Green-Dark-Medium"
   "media|$data_home/backgrounds/dotfiles"
 )
 
@@ -174,6 +176,69 @@ install_gruvbox_papirus_icons() {
   printf 'Installed Papirus-Dark Gruvbox %s in %s.\n' "$variant_version" "$destination"
 }
 
+install_everforest_papirus_icons() {
+  local icons_home="$data_home/icons"
+  local destination="$icons_home/Papirus-Dark-Everforest"
+  local marker="$destination/.dotfiles-version"
+  local variant_version="${papirus_version}-everforest-green-v1"
+  local source relative target theme directory size scale answer
+  local -a directories
+
+  if [[ -r $marker ]] && [[ $(<"$marker") == "$variant_version" ]]; then
+    printf 'Papirus-Dark Everforest %s is already installed.\n' "$variant_version"
+    return 0
+  fi
+  [[ -d $icons_home/Papirus && -d $icons_home/Papirus-Dark ]] || {
+    printf 'Papirus must be installed before its Everforest folder variant.\n' >&2
+    return 1
+  }
+  if [[ ( -e $destination || -L $destination ) && ! -r $marker ]]; then
+    printf 'An existing Papirus-Dark-Everforest theme will be replaced. Continue? [y/N] '
+    read -r answer
+    case $answer in
+      y|Y) ;;
+      *) printf 'Skipped: Papirus-Dark-Everforest icon theme\n'; return 0 ;;
+    esac
+  fi
+
+  rm -rf -- "$destination"
+  mkdir -p -- "$destination"
+
+  # Override only violet folder assets and inherit every other icon. The three
+  # replacement colors preserve Papirus shading with the Everforest palette.
+  for theme in Papirus Papirus-Dark; do
+    while IFS= read -r -d '' source; do
+      relative=${source#"$icons_home/$theme/"}
+      target="$destination/$relative"
+      mkdir -p -- "$(dirname -- "$target")"
+      sed -e 's/#7e57c2/#a7c080/g' -e 's/#5d399b/#829267/g' \
+        -e 's/#2c1e44/#425047/g' "$source" > "$target"
+    done < <(find -L "$icons_home/$theme" -path '*/places/*.svg' -type f \
+      -exec grep -IlZ -E '#(7e57c2|5d399b|2c1e44)' {} + 2>/dev/null || true)
+  done
+
+  mapfile -t directories < <(
+    find "$destination" -type f -name '*.svg' -printf '%h\n' |
+      sed "s|^$destination/||" | LC_ALL=C sort -u
+  )
+  {
+    printf '[Icon Theme]\nName=Papirus-Dark-Everforest\n'
+    printf 'Comment=Papirus-Dark with Everforest green folders\n'
+    printf 'Inherits=Papirus-Dark\nDirectories='
+    (IFS=,; printf '%s\n' "${directories[*]}")
+    for directory in "${directories[@]}"; do
+      size=${directory%%x*}
+      scale=1
+      [[ $directory == *@2x/* ]] && scale=2
+      printf '\n[%s]\nSize=%s\nScale=%s\nContext=Places\nType=Fixed\n' \
+        "$directory" "$size" "$scale"
+    done
+  } > "$destination/index.theme"
+  printf '%s\n' "$variant_version" > "$marker"
+  printf 'Installed Papirus-Dark Everforest %s in %s.\n' \
+    "$variant_version" "$destination"
+}
+
 remove_legacy_theme_links() {
   local name destination target
 
@@ -257,6 +322,54 @@ install_gruvbox_kvantum_theme() {
   cp -- "$source/LICENSE" "$directory/LICENSE"
   printf '%s\n' "$version" > "$marker"
   printf 'Installed Gruvbox Kvantum theme in %s.\n' "$directory"
+}
+
+install_everforest_kvantum_theme() {
+  local directory="$config_home/Kvantum/everforest-dark"
+  local marker="$directory/.dotfiles-version"
+  local version='catppuccin-kvantum-71105d2-everforest-v1'
+  local source="$repo_dir/Kvantum/catppuccin-macchiato-blue"
+  local answer
+
+  if [[ -r $marker ]] && [[ $(<"$marker") == "$version" ]]; then
+    printf 'Everforest Kvantum theme is already installed.\n'
+    return 0
+  fi
+  if [[ -e $directory || -L $directory ]]; then
+    printf 'An existing Everforest Kvantum theme will be replaced. Continue? [y/N] '
+    read -r answer
+    case $answer in
+      y|Y) ;;
+      *) printf 'Skipped: Everforest Kvantum theme\n'; return 0 ;;
+    esac
+  fi
+
+  rm -rf -- "$directory"
+  mkdir -p -- "$directory"
+  sed \
+    -e 's/Catppuccin-Macchiato-Blue/Everforest-Dark/g' \
+    -e 's/#24273A/#2D353B/g' -e 's/#1E2030/#232A2E/g' \
+    -e 's/#363A4F/#343F44/g' -e 's/#494D64/#3D484D/g' \
+    -e 's/#5B6078/#475258/g' -e 's/#6E738D/#56635F/g' \
+    -e 's/#939AB7/#859289/g' -e 's/#A5ADCB/#9DA9A0/g' \
+    -e 's/#CAD3F5/#D3C6AA/g' -e 's/#8AADF4/#A7C080/g' \
+    -e 's/#809FE1/#829267/g' -e 's/#96B4F4/#83C092/g' \
+    -e 's/#C6A0F6/#D699B6/g' -e 's/#ED8796/#E67E80/g' \
+    "$source/catppuccin-macchiato-blue.kvconfig" \
+    > "$directory/everforest-dark.kvconfig"
+  sed \
+    -e 's/#24273A/#2D353B/g' -e 's/#1E2030/#232A2E/g' \
+    -e 's/#363A4F/#343F44/g' -e 's/#494D64/#3D484D/g' \
+    -e 's/#5B6078/#475258/g' -e 's/#6E738D/#56635F/g' \
+    -e 's/#939AB7/#859289/g' -e 's/#A5ADCB/#9DA9A0/g' \
+    -e 's/#CAD3F5/#D3C6AA/g' -e 's/#8AADF4/#A7C080/g' \
+    -e 's/#809FE1/#829267/g' -e 's/#96B4F4/#83C092/g' \
+    -e 's/#C6A0F6/#D699B6/g' -e 's/#ED8796/#E67E80/g' \
+    "$source/catppuccin-macchiato-blue.svg" \
+    > "$directory/everforest-dark.svg"
+  cp -- "$source/LICENSE" "$directory/LICENSE"
+  printf '%s\n' "$version" > "$marker"
+  printf 'Installed Everforest Kvantum theme in %s.\n' "$directory"
 }
 
 install_flameshot_runtime_theme() {
@@ -432,13 +545,71 @@ initialize_font_profile() {
   link_file 'fonts/profiles/meslo-lg' "$destination"
 }
 
+install_vscode_theme_extensions() {
+  local archive="$repo_dir/vscode/dotfiles-theme-1.0.1.vsix"
+  local theme_source="$config_home/dotfiles-theme/vscode.json"
+  local version='1.0.1'
+  local marker_version='vsix-1.0.1'
+  local installation command_name extensions_home destination marker answer
+  local -a installations=(
+    'code|.vscode'
+    'code-insiders|.vscode-insiders'
+    'codium|.vscode-oss'
+  )
+
+  [[ -r $archive && -r $theme_source ]] || {
+    printf 'Dotfiles VS Code theme package is incomplete.\n' >&2
+    return 1
+  }
+  for installation in "${installations[@]}"; do
+    command_name=${installation%%|*}
+    extensions_home="$HOME/${installation#*|}/extensions"
+    command -v "$command_name" >/dev/null 2>&1 || continue
+    destination="$extensions_home/dotfiles.dotfiles-theme-$version"
+    marker="$destination/.dotfiles-managed"
+
+    if [[ -r $marker && $(<"$marker") == "$marker_version" ]] &&
+       [[ -r $destination/package.json ]] &&
+       "$command_name" --list-extensions 2>/dev/null |
+         grep -Fqix 'dotfiles.dotfiles-theme'; then
+      cp -- "$theme_source" "$destination/themes/dotfiles-color-theme.json"
+      printf 'Dotfiles theme extension for %s is already installed.\n' "$command_name"
+      continue
+    fi
+    if [[ ( -e $destination || -L $destination ) && ! -r $marker ]]; then
+      printf '"%s" already exists. Replace it? [y/N] ' "$destination"
+      read -r answer
+      case $answer in
+        y|Y) ;;
+        *) printf 'Skipped: %s\n' "$destination"; continue ;;
+      esac
+    fi
+
+    # Use the editor's installer instead of placing files directly. VS Code
+    # records manually added folders as removed in its extension registry.
+    rm -rf -- "$destination"
+    "$command_name" --install-extension "$archive" --force || return 1
+    [[ -r $destination/package.json ]] || {
+      printf 'VS Code did not install the Dotfiles theme in %s.\n' "$destination" >&2
+      return 1
+    }
+    cp -- "$theme_source" "$destination/themes/dotfiles-color-theme.json"
+    printf '%s\n' "$marker_version" > "$marker"
+    printf 'Installed Dotfiles theme extension for %s in %s.\n' \
+      "$command_name" "$destination"
+  done
+}
+
 status=0
 install_papirus_icons || status=1
 install_gruvbox_papirus_icons || status=1
+install_everforest_papirus_icons || status=1
 remove_legacy_theme_links
 install_gruvbox_kvantum_theme || status=1
+install_everforest_kvantum_theme || status=1
 initialize_theme_profile || status=1
 initialize_font_profile || status=1
+install_vscode_theme_extensions || status=1
 install_desktop_runtime_configs || status=1
 for entry in "${links[@]}"; do
   link_file "${entry%%|*}" "${entry#*|}" || status=1

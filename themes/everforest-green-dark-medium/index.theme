@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Everforest-Green-Dark-Medium
+Comment=Complete Everforest green dark medium GTK theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Everforest-Green-Dark-Medium
+MetacityTheme=Everforest-Green-Dark-Medium
+IconTheme=Papirus-Dark-Everforest
+CursorTheme=Adwaita
+ButtonLayout=icon:minimize,maximize,close

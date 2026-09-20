@@ -1,0 +1,11 @@
+s/#8aadf4/#a7c080/g
+s/#cad3f5/#d3c6aa/g
+s/#c6a0f6/#d699b6/g
+s/#6e738d/#7a8478/g
+s/#24273a/#2d353b/g
+s/#494d64/#3d484d/g
+s/#8bd5ca/#83c092/g
+s/#7dc4e4/#7fbbb3/g
+s/#eed49f/#dbbc7f/g
+s/#a6da95/#a7c080/g
+s/#ed8796/#e67e80/g

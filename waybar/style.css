@@ -216,3 +216,23 @@ window#waybar.transparent .modules-right * {
   box-shadow: none;
   text-shadow: none;
 }
+
+/* Tray pop-up menus belong to the bar's widget tree, but must remain opaque
+ * when the bar itself is transparent. */
+window#waybar.transparent .modules-right menu {
+  color: @text;
+  background-color: @mantle;
+  border: 1px solid @surface1;
+}
+
+window#waybar.transparent .modules-right menu * {
+  color: @text;
+}
+
+window#waybar.transparent .modules-right menu menuitem {
+  background-color: transparent;
+}
+
+window#waybar.transparent .modules-right menu menuitem:hover {
+  background-color: @surface0;
+}

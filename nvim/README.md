@@ -5,7 +5,7 @@ It requires Neovim 0.12 or later and has been tested with the installed Neovim 0
 
 ## Included features
 
-- Native theme driven by the active global dotfiles profile
+- Native theme driven by the terminal ANSI palette
 - Native home page with project actions for `nvim` and `nvim .`
 - Automatic LSP startup for servers available in `PATH`
 - Native LSP completion and snippet expansion
@@ -26,7 +26,7 @@ The configuration is split by responsibility:
 
 - `init.lua` — bootstrap and module loading
 - `lua/config/options.lua` — editor options
-- `lua/config/theme.lua` — native profile-driven theme definitions
+- `lua/config/theme.lua` — native ANSI theme definitions
 - `lua/config/autocmds.lua` — general autocommands
 - `lua/config/statusline.lua` — statusline and Git branch
 - `lua/config/tabline.lua` — clickable buffer line
@@ -39,7 +39,7 @@ The configuration is split by responsibility:
 
 ## Theme
 
-The palette is loaded from `${XDG_CONFIG_HOME:-~/.config}/dotfiles-theme/nvim.lua` and applied directly with Neovim's highlight API. It covers the editor UI, Vim syntax, Tree-sitter captures, LSP semantic tokens, diagnostics, and terminal ANSI colors without requiring a theme plugin. New instances use the profile selected by the global theme switcher, while a running instance reloads the palette when it regains focus.
+The theme uses ANSI color indexes 0–15 and leaves their RGB values to the host terminal. It covers the editor UI, Vim syntax, Tree-sitter captures, LSP semantic tokens, diagnostics, and terminal buffers without requiring a theme plugin. With the included Alacritty configuration, these indexes resolve to Konsole's Breeze palette.
 
 ## Language servers
 

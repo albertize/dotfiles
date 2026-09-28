@@ -57,7 +57,7 @@ _G.NativeIDEStatusline = function()
     "%#User2#%m",
     "%#User3#", diagnostics,
     "%#User4#", lsp,
-    "%=",
+    "%#StatusLine#%=",
     "%#User5#%l/%L ",
     "%#User2#%4v ",
     "%#User4# ", branch, " ",

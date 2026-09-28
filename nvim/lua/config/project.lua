@@ -36,6 +36,7 @@ local function native_picker(items, title, on_choice)
   })
 
   vim.wo[list_win].cursorline = true
+  vim.wo[list_win].winhighlight = "CursorLine:NativePickerSelection"
   vim.wo[list_win].wrap = false
   vim.bo[list_buf].buftype = "nofile"
   vim.bo[list_buf].bufhidden = "wipe"

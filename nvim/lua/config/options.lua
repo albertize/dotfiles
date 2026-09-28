@@ -10,7 +10,8 @@ opt.ruler = true
 opt.showmode = true
 opt.laststatus = 3
 opt.showtabline = 2
-opt.termguicolors = true
+-- Keep colors tied to the terminal's ANSI palette.
+opt.termguicolors = false
 opt.cursorline = true
 opt.signcolumn = "yes"
 opt.colorcolumn = ""
